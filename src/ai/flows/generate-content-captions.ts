@@ -1,4 +1,4 @@
-// use server'
+'use server';
 
 /**
  * @fileOverview AI agent that generates high-performing post captions and scripts for various platforms and content formats, tailored to user's brand.
