@@ -13,8 +13,11 @@ import {
   AutofillAudienceDetailsInputSchema,
   AutofillAudienceDetailsOutputSchema,
   type AutofillAudienceDetailsInput,
-  type AutofillAudienceDetailsOutput
+  type AutofillAudienceDetailsOutput,
+  AutofillAudienceDetailsContentInputSchema,
+  AutofillAudienceDetailsContentInput
 } from '@/ai/schemas/autofill-schemas';
+import { parse } from 'node-html-parser';
 
 export type { AutofillAudienceDetailsInput, AutofillAudienceDetailsOutput };
 
@@ -24,7 +27,7 @@ export async function autofillAudienceDetails(input: AutofillAudienceDetailsInpu
 
 const prompt = ai.definePrompt({
   name: 'autofillAudiencePrompt',
-  input: {schema: AutofillAudienceDetailsInputSchema},
+  input: {schema: AutofillAudienceDetailsContentInputSchema},
   output: {schema: AutofillAudienceDetailsOutputSchema},
   prompt: `You are an expert marketing analyst. Analyze the provided content and extract the brand details and target audience information.
 
@@ -32,8 +35,8 @@ const prompt = ai.definePrompt({
   {{#if (eq source.type "pdf")}}
   {{media url=source.data}}
   {{/if}}
-  {{#if (eq source.type "url")}}
-  The primary source of information is the website at this URL: {{{source.data}}}
+  {{#if (eq source.type "text")}}
+  {{{source.data}}}
   {{/if}}
 
   Based on the content, provide a concise summary for:
@@ -50,7 +53,27 @@ const autofillAudienceDetailsFlow = ai.defineFlow(
     outputSchema: AutofillAudienceDetailsOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    let contentInput: AutofillAudienceDetailsContentInput;
+
+    if (input.source.type === 'url') {
+      try {
+        const response = await fetch(input.source.data);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch URL: ${response.statusText}`);
+        }
+        const html = await response.text();
+        const root = parse(html);
+        const bodyText = root.querySelector('body')?.innerText ?? '';
+        contentInput = { source: { type: 'text', data: bodyText.replace(/\s\s+/g, ' ').trim() } };
+      } catch (e: any) {
+        console.error(`Error fetching or parsing URL: ${e.message}`);
+        throw new Error('Could not retrieve content from the provided URL.');
+      }
+    } else {
+      contentInput = input;
+    }
+
+    const {output} = await prompt(contentInput);
     return output!;
   }
 );
