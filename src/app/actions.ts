@@ -6,6 +6,8 @@ import { identifyTrendingTopics, IdentifyTrendingTopicsInput } from '@/ai/flows/
 import { generateViralHooks, GenerateViralHooksInput } from '@/ai/flows/generate-viral-hooks';
 import { generateContentCaptions, GenerateContentCaptionsInput } from '@/ai/flows/generate-content-captions';
 import { generateContentCalendar, GenerateContentCalendarInput } from '@/ai/flows/generate-content-calendar';
+import { autofillAudienceDetails, type AutofillAudienceDetailsInput } from '@/ai/flows/autofill-audience-details';
+
 
 const handleError = (error: unknown) => {
   console.error(error);
@@ -61,6 +63,15 @@ export async function runContentCrafter(input: GenerateContentCaptionsInput) {
 export async function runCalendarCreator(input: GenerateContentCalendarInput) {
   try {
     const result = await generateContentCalendar(input);
+    return { data: result };
+  } catch (error) {
+    return handleError(error);
+  }
+}
+
+export async function runAutofillAudienceDetails(input: AutofillAudienceDetailsInput) {
+  try {
+    const result = await autofillAudienceDetails(input);
     return { data: result };
   } catch (error) {
     return handleError(error);
