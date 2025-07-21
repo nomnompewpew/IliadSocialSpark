@@ -26,14 +26,14 @@ const prompt = ai.definePrompt({
   name: 'autofillAudiencePrompt',
   input: {schema: AutofillAudienceDetailsInputSchema},
   output: {schema: AutofillAudienceDetailsOutputSchema},
-  prompt: `You are an expert marketing analyst. Analyze the provided content (from a {{source.type}}) and extract the brand details and target audience information.
+  prompt: `You are an expert marketing analyst. Analyze the provided content and extract the brand details and target audience information.
 
   Content to analyze:
   {{#if (eq source.type "pdf")}}
   {{media url=source.data}}
   {{/if}}
   {{#if (eq source.type "url")}}
-  This is a website, you will need to fetch its content to analyze it: {{{source.data}}}
+  The primary source of information is the website at this URL: {{{source.data}}}
   {{/if}}
 
   Based on the content, provide a concise summary for:
