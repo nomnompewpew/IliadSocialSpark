@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/layout/header";
 import { 
@@ -14,8 +17,25 @@ import TrendTracker from "@/components/features/trend-tracker";
 import ViralHookGenerator from "@/components/features/viral-hook-generator";
 import ContentCrafter from "@/components/features/content-crafter";
 import CalendarCreator from "@/components/features/calendar-creator";
+import type { AudienceInsightsOutput } from '@/ai/flows/generate-audience-insights';
+
+export interface SharedState {
+  brandDetails: string;
+  targetDemographic: string;
+  audienceAnalysisReport: AudienceInsightsOutput | null;
+}
 
 export default function Home() {
+  const [sharedState, setSharedState] = useState<SharedState>({
+    brandDetails: '',
+    targetDemographic: '',
+    audienceAnalysisReport: null,
+  });
+  
+  const handleAudienceInsightsUpdate = (newState: Partial<SharedState>) => {
+    setSharedState(prevState => ({ ...prevState, ...newState }));
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
@@ -49,22 +69,35 @@ export default function Home() {
           </TabsList>
           
           <TabsContent value="audience" className="mt-6">
-            <AudienceInsights />
+            <AudienceInsights 
+              sharedState={sharedState}
+              onUpdate={handleAudienceInsightsUpdate}
+            />
           </TabsContent>
           <TabsContent value="strategy" className="mt-6">
-            <StrategyAlchemist />
+            <StrategyAlchemist 
+               brandDescription={sharedState.brandDetails}
+               targetAudience={sharedState.targetDemographic}
+            />
           </TabsContent>
           <TabsContent value="trends" className="mt-6">
             <TrendTracker />
           </TabsContent>
           <TabsContent value="hooks" className="mt-6">
-            <ViralHookGenerator />
+            <ViralHookGenerator 
+              audiencePsychology={sharedState.targetDemographic}
+            />
           </TabsContent>
           <TabsContent value="content" className="mt-6">
-            <ContentCrafter />
+            <ContentCrafter 
+               brandDescription={sharedState.brandDetails}
+            />
           </TabsContent>
           <TabsContent value="calendar" className="mt-6">
-            <CalendarCreator />
+            <CalendarCreator 
+              brandDescription={sharedState.brandDetails}
+              targetAudience={sharedState.targetDemographic}
+            />
           </TabsContent>
         </Tabs>
       </main>

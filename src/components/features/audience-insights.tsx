@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -19,11 +19,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { runAudienceInsights, runAutofillAudienceDetails } from '@/app/actions';
-import type { AudienceInsightsOutput } from '@/ai/flows/generate-audience-insights';
 import { Skeleton } from '../ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
+import type { SharedState } from '@/app/page';
 
 const formSchema = z.object({
   brandDetails: z.string().min(10, {
@@ -34,10 +34,14 @@ const formSchema = z.object({
   }).max(2000, { message: 'Target demographic must be at most 2000 characters.' }),
 });
 
-export default function AudienceInsights() {
+interface AudienceInsightsProps {
+  sharedState: SharedState;
+  onUpdate: (newState: Partial<SharedState>) => void;
+}
+
+export default function AudienceInsights({ sharedState, onUpdate }: AudienceInsightsProps) {
   const [isPending, startTransition] = useTransition();
   const [isAutofilling, startAutofillTransition] = useTransition();
-  const [result, setResult] = useState<AudienceInsightsOutput | null>(null);
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const { toast } = useToast();
@@ -45,10 +49,16 @@ export default function AudienceInsights() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      brandDetails: '',
-      targetDemographic: '',
+      brandDetails: sharedState.brandDetails || '',
+      targetDemographic: sharedState.targetDemographic || '',
     },
   });
+
+  useEffect(() => {
+    form.setValue('brandDetails', sharedState.brandDetails);
+    form.setValue('targetDemographic', sharedState.targetDemographic);
+  }, [sharedState, form]);
+  
 
   const handlePdfUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -97,6 +107,7 @@ export default function AudienceInsights() {
         return;
       }
       if (data) {
+        onUpdate({ brandDetails: data.brandDetails, targetDemographic: data.targetDemographic });
         form.setValue('brandDetails', data.brandDetails, { shouldValidate: true });
         form.setValue('targetDemographic', data.targetDemographic, { shouldValidate: true });
         toast({ title: 'Autofill Successful', description: 'The fields have been populated.' });
@@ -105,7 +116,7 @@ export default function AudienceInsights() {
   }
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    setResult(null);
+    onUpdate({ audienceAnalysisReport: null });
     startTransition(async () => {
       const { data, error } = await runAudienceInsights(values);
       if (error) {
@@ -116,7 +127,7 @@ export default function AudienceInsights() {
         });
         return;
       }
-      setResult(data);
+      onUpdate({ brandDetails: values.brandDetails, targetDemographic: values.targetDemographic, audienceAnalysisReport: data });
     });
   }
 
@@ -224,12 +235,12 @@ export default function AudienceInsights() {
               <Skeleton className="h-4 w-full" />
             </div>
           )}
-          {result && (
+          {sharedState.audienceAnalysisReport && (
              <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">
-              {result.audienceAnalysisReport}
+              {sharedState.audienceAnalysisReport.audienceAnalysisReport}
             </div>
           )}
-          {!isPending && !result && (
+          {!isPending && !sharedState.audienceAnalysisReport && (
             <div className="text-center text-muted-foreground py-8">
               Your report is waiting to be generated.
             </div>

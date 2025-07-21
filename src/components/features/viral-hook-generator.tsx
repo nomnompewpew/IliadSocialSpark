@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -27,7 +27,11 @@ const formSchema = z.object({
   audiencePsychology: z.string().min(10, { message: 'Audience psychology must be at least 10 characters.' }),
 });
 
-export default function ViralHookGenerator() {
+interface ViralHookGeneratorProps {
+  audiencePsychology: string;
+}
+
+export default function ViralHookGenerator({ audiencePsychology }: ViralHookGeneratorProps) {
   const [isPending, startTransition] = useTransition();
   const [result, setResult] = useState<GenerateViralHooksOutput | null>(null);
   const { toast } = useToast();
@@ -36,9 +40,13 @@ export default function ViralHookGenerator() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       niche: '',
-      audiencePsychology: '',
+      audiencePsychology: audiencePsychology || '',
     },
   });
+
+  useEffect(() => {
+    form.setValue('audiencePsychology', audiencePsychology);
+  }, [audiencePsychology, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     setResult(null);

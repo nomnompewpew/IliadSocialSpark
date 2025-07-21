@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -36,7 +36,11 @@ const formSchema = z.object({
   keywords: z.string().min(3, { message: 'Please provide at least one keyword.' }),
 });
 
-export default function ContentCrafter() {
+interface ContentCrafterProps {
+  brandDescription: string;
+}
+
+export default function ContentCrafter({ brandDescription }: ContentCrafterProps) {
   const [isPending, startTransition] = useTransition();
   const [result, setResult] = useState<GenerateContentCaptionsOutput | null>(null);
   const { toast } = useToast();
@@ -44,13 +48,17 @@ export default function ContentCrafter() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      brandDescription: '',
+      brandDescription: brandDescription || '',
       platform: 'Instagram',
       contentFormat: 'Post',
       topic: '',
       keywords: '',
     },
   });
+
+  useEffect(() => {
+    form.setValue('brandDescription', brandDescription);
+  }, [brandDescription, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     setResult(null);

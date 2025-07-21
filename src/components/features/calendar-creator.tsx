@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -28,7 +28,12 @@ const formSchema = z.object({
   goals: z.string().min(5, { message: 'Goals are required.' }),
 });
 
-export default function CalendarCreator() {
+interface CalendarCreatorProps {
+  brandDescription: string;
+  targetAudience: string;
+}
+
+export default function CalendarCreator({ brandDescription, targetAudience }: CalendarCreatorProps) {
   const [isPending, startTransition] = useTransition();
   const [result, setResult] = useState<GenerateContentCalendarOutput | null>(null);
   const { toast } = useToast();
@@ -36,11 +41,17 @@ export default function CalendarCreator() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      brandDescription: '',
-      targetAudience: '',
+      brandDescription: brandDescription || '',
+      targetAudience: targetAudience || '',
       goals: '',
     },
   });
+
+  useEffect(() => {
+    form.setValue('brandDescription', brandDescription);
+    form.setValue('targetAudience', targetAudience);
+  }, [brandDescription, targetAudience, form]);
+
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     setResult(null);
