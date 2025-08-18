@@ -63,7 +63,7 @@ const identifyTrendingTopicsFlow = ai.defineFlow(
     inputSchema: IdentifyTrendingTopicsInputSchema,
     outputSchema: IdentifyTrendingTopicsOutputSchema,
   },
-  async input => {
+  async (input) => {
     const {output} = await prompt({
         niche: input.niche,
         platforms: input.platforms.join(', '),
