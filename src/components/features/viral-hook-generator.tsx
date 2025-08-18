@@ -19,8 +19,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { runViralHookGenerator } from '@/app/actions';
-import type { GenerateViralHooksOutput } from '@/ai/flows/generate-viral-hooks';
 import { Skeleton } from '../ui/skeleton';
+import type { SharedState } from '@/app/page';
 
 const formSchema = z.object({
   niche: z.string().min(3, { message: 'Niche must be at least 3 characters.' }),
@@ -28,35 +28,35 @@ const formSchema = z.object({
 });
 
 interface ViralHookGeneratorProps {
-  audiencePsychology: string;
+  sharedState: SharedState;
+  onUpdate: (newState: Partial<SharedState>) => void;
 }
 
-export default function ViralHookGenerator({ audiencePsychology }: ViralHookGeneratorProps) {
+export default function ViralHookGenerator({ sharedState, onUpdate }: ViralHookGeneratorProps) {
   const [isPending, startTransition] = useTransition();
-  const [result, setResult] = useState<GenerateViralHooksOutput | null>(null);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       niche: '',
-      audiencePsychology: audiencePsychology || '',
+      audiencePsychology: sharedState.targetDemographic || '',
     },
   });
 
   useEffect(() => {
-    form.setValue('audiencePsychology', audiencePsychology);
-  }, [audiencePsychology, form]);
+    form.setValue('audiencePsychology', sharedState.targetDemographic);
+  }, [sharedState.targetDemographic, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    setResult(null);
+    onUpdate({ hooks: null });
     startTransition(async () => {
       const { data, error } = await runViralHookGenerator(values);
       if (error) {
         toast({ title: 'Error', description: error, variant: 'destructive' });
         return;
       }
-      setResult(data);
+      onUpdate({ hooks: data });
     });
   }
 
@@ -111,14 +111,14 @@ export default function ViralHookGenerator({ audiencePsychology }: ViralHookGene
               <Skeleton className="h-5 w-full" />
             </div>
           )}
-          {result && (
+          {sharedState.hooks && (
             <ul className="space-y-3 list-disc list-inside">
-              {result.viralHooks.map((hook, index) => (
+              {sharedState.hooks.viralHooks.map((hook, index) => (
                 <li key={index} className="bg-secondary/50 p-3 rounded-md">{hook}</li>
               ))}
             </ul>
           )}
-          {!isPending && !result && (
+          {!isPending && !sharedState.hooks && (
             <div className="text-center text-muted-foreground py-8">
               Viral hooks are ready to be discovered.
             </div>

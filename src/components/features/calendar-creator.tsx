@@ -18,9 +18,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { runCalendarCreator } from '@/app/actions';
-import type { GenerateContentCalendarOutput } from '@/ai/flows/generate-content-calendar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from '../ui/skeleton';
+import type { SharedState } from '@/app/page';
 
 const formSchema = z.object({
   brandDescription: z.string().min(10, { message: 'Brand description must be at least 10 characters.' }),
@@ -29,39 +29,38 @@ const formSchema = z.object({
 });
 
 interface CalendarCreatorProps {
-  brandDescription: string;
-  targetAudience: string;
+  sharedState: SharedState;
+  onUpdate: (newState: Partial<SharedState>) => void;
 }
 
-export default function CalendarCreator({ brandDescription, targetAudience }: CalendarCreatorProps) {
+export default function CalendarCreator({ sharedState, onUpdate }: CalendarCreatorProps) {
   const [isPending, startTransition] = useTransition();
-  const [result, setResult] = useState<GenerateContentCalendarOutput | null>(null);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      brandDescription: brandDescription || '',
-      targetAudience: targetAudience || '',
+      brandDescription: sharedState.brandDetails || '',
+      targetAudience: sharedState.targetDemographic || '',
       goals: '',
     },
   });
 
   useEffect(() => {
-    form.setValue('brandDescription', brandDescription);
-    form.setValue('targetAudience', targetAudience);
-  }, [brandDescription, targetAudience, form]);
+    form.setValue('brandDescription', sharedState.brandDetails);
+    form.setValue('targetAudience', sharedState.targetDemographic);
+  }, [sharedState.brandDetails, sharedState.targetDemographic, form]);
 
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    setResult(null);
+    onUpdate({ calendar: null });
     startTransition(async () => {
       const { data, error } = await runCalendarCreator(values);
       if (error) {
         toast({ title: 'Error', description: error, variant: 'destructive' });
         return;
       }
-      setResult(data);
+      onUpdate({ calendar: data });
     });
   }
 
@@ -120,7 +119,7 @@ export default function CalendarCreator({ brandDescription, targetAudience }: Ca
                 <Skeleton className="h-10 w-full" />
              </div>
           )}
-          {result && (
+          {sharedState.calendar && (
             <div className="max-h-[60vh] overflow-auto">
               <Table>
                 <TableHeader className='sticky top-0 bg-card'>
@@ -132,7 +131,7 @@ export default function CalendarCreator({ brandDescription, targetAudience }: Ca
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {result.calendar.map((entry) => (
+                  {sharedState.calendar.calendar.map((entry) => (
                     <TableRow key={entry.day}>
                       <TableCell className="font-medium">{entry.day}</TableCell>
                       <TableCell>{entry.postType}</TableCell>
@@ -144,7 +143,7 @@ export default function CalendarCreator({ brandDescription, targetAudience }: Ca
               </Table>
             </div>
           )}
-          {!isPending && !result && (
+          {!isPending && !sharedState.calendar && (
             <div className="text-center text-muted-foreground py-8">
               Your content calendar is waiting to be planned.
             </div>

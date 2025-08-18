@@ -21,9 +21,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { runContentCrafter } from '@/app/actions';
-import type { GenerateContentCaptionsOutput } from '@/ai/flows/generate-content-captions';
 import { Skeleton } from '../ui/skeleton';
 import { Separator } from '../ui/separator';
+import type { SharedState } from '@/app/page';
 
 const platforms = ['Instagram', 'TikTok', 'LinkedIn', 'X', 'Facebook'] as const;
 const formats = ['Carousel', 'Video', 'Story', 'Reel', 'Post'] as const;
@@ -37,18 +37,18 @@ const formSchema = z.object({
 });
 
 interface ContentCrafterProps {
-  brandDescription: string;
+  sharedState: SharedState;
+  onUpdate: (newState: Partial<SharedState>) => void;
 }
 
-export default function ContentCrafter({ brandDescription }: ContentCrafterProps) {
+export default function ContentCrafter({ sharedState, onUpdate }: ContentCrafterProps) {
   const [isPending, startTransition] = useTransition();
-  const [result, setResult] = useState<GenerateContentCaptionsOutput | null>(null);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      brandDescription: brandDescription || '',
+      brandDescription: sharedState.brandDetails || '',
       platform: 'Instagram',
       contentFormat: 'Post',
       topic: '',
@@ -57,18 +57,18 @@ export default function ContentCrafter({ brandDescription }: ContentCrafterProps
   });
 
   useEffect(() => {
-    form.setValue('brandDescription', brandDescription);
-  }, [brandDescription, form]);
+    form.setValue('brandDescription', sharedState.brandDetails);
+  }, [sharedState.brandDetails, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    setResult(null);
+    onUpdate({ captions: null });
     startTransition(async () => {
       const { data, error } = await runContentCrafter({ ...values, numberOfCaptions: 3 });
       if (error) {
         toast({ title: 'Error', description: error, variant: 'destructive' });
         return;
       }
-      setResult(data);
+      onUpdate({ captions: data });
     });
   }
 
@@ -148,17 +148,17 @@ export default function ContentCrafter({ brandDescription }: ContentCrafterProps
               <div className='space-y-2'><Skeleton className="h-4 w-1/4" /><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-5/6" /></div>
             </div>
           )}
-          {result && (
+          {sharedState.captions && (
             <div className="space-y-6">
-              {result.captions.map((caption, index) => (
+              {sharedState.captions.captions.map((caption, index) => (
                 <div key={index}>
                     <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">{caption}</div>
-                    {index < result.captions.length - 1 && <Separator className="my-4" />}
+                    {index < sharedState.captions.captions.length - 1 && <Separator className="my-4" />}
                 </div>
               ))}
             </div>
           )}
-          {!isPending && !result && (
+          {!isPending && !sharedState.captions && (
             <div className="text-center text-muted-foreground py-8">
               Your next viral post starts here.
             </div>
