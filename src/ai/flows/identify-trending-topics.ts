@@ -36,7 +36,10 @@ const prompt = ai.definePrompt({
     niche: z.string(),
     platforms: z.string(),
   })},
-  output: {schema: IdentifyTrendingTopicsOutputSchema},
+  output: {
+    schema: IdentifyTrendingTopicsOutputSchema,
+    format: 'json',
+  },
   prompt: `You are an expert social media analyst. Your job is to identify trending topics for a given niche on specified social media platforms.
 
   Niche: {{{niche}}}
