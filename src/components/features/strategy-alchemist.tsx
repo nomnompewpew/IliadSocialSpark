@@ -26,6 +26,7 @@ import type { SharedState } from '@/app/page';
 
 const formSchema = z.object({
   brandName: z.string().min(2, { message: 'Brand name is required.' }),
+  industry: z.string().min(2, { message: 'Industry/Field is required.' }),
   brandDescription: z.string().min(10, { message: 'Brand description must be at least 10 characters.' }),
   targetAudience: z.string().min(10, { message: 'Target audience must be at least 10 characters.' }),
   goals: z.string().min(5, { message: 'Goals are required.' }),
@@ -88,6 +89,7 @@ export default function StrategyAlchemist({ sharedState, onUpdate }: StrategyAlc
     resolver: zodResolver(formSchema),
     defaultValues: {
       brandName: '',
+      industry: sharedState.industry || '',
       brandDescription: sharedState.brandDetails || '',
       targetAudience: sharedState.targetDemographic || '',
       goals: '',
@@ -97,10 +99,11 @@ export default function StrategyAlchemist({ sharedState, onUpdate }: StrategyAlc
   useEffect(() => {
     form.setValue('brandDescription', sharedState.brandDetails);
     form.setValue('targetAudience', sharedState.targetDemographic);
-  }, [sharedState.brandDetails, sharedState.targetDemographic, form]);
+    form.setValue('industry', sharedState.industry);
+  }, [sharedState.brandDetails, sharedState.targetDemographic, sharedState.industry, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    onUpdate({ strategy: null });
+    onUpdate({ strategy: null, industry: values.industry });
     startTransition(async () => {
       const { data, error } = await runStrategyAlchemist(values);
       if (error) {
@@ -125,13 +128,22 @@ export default function StrategyAlchemist({ sharedState, onUpdate }: StrategyAlc
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className='grid grid-cols-2 gap-4'>
               <FormField control={form.control} name="brandName" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Brand Name</FormLabel>
-                  <FormControl><Input placeholder="e.g., Iliad" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
+                  <FormItem>
+                    <FormLabel>Brand Name</FormLabel>
+                    <FormControl><Input placeholder="e.g., Iliad" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="industry" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Industry / Field</FormLabel>
+                    <FormControl><Input placeholder="e.g., Fashion, Tech" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </div>
               <FormField control={form.control} name="brandDescription" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Brand Description</FormLabel>

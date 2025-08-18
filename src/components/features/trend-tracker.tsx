@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -81,13 +81,29 @@ export default function TrendTracker({ sharedState, onUpdate }: TrendTrackerProp
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      industry: '',
+      industry: sharedState.industry || '',
       products: '',
       services: '',
       buyingHabits: '',
       entertainment: '',
     },
   });
+
+  useEffect(() => {
+    if (sharedState.industry) {
+      form.setValue('industry', sharedState.industry);
+    }
+    // Suggest keywords based on brand and audience details
+    if (sharedState.brandDetails) {
+        form.setValue('products', 'Suggest products based on: ' + sharedState.brandDetails);
+        form.setValue('services', 'Suggest services based on: ' + sharedState.brandDetails);
+    }
+    if (sharedState.targetDemographic) {
+        form.setValue('buyingHabits', 'Suggest buying habits based on: ' + sharedState.targetDemographic);
+        form.setValue('entertainment', 'Suggest entertainment based on: ' + sharedState.targetDemographic);
+    }
+  }, [sharedState.industry, sharedState.brandDetails, sharedState.targetDemographic, form]);
+
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     onUpdate({ trends: null });
@@ -166,11 +182,11 @@ export default function TrendTracker({ sharedState, onUpdate }: TrendTrackerProp
         <CardContent>
           {(isPending || sharedState.trends) ? (
             <Accordion type="multiple" defaultValue={['x']} className="w-full">
-                <PlatformTrendsDisplay title="X (Twitter)" trends={sharedState.trends?.x} isLoading={isPending} />
-                <PlatformTrendsDisplay title="Facebook" trends={sharedState.trends?.facebook} isLoading={isPending} />
-                <PlatformTrendsDisplay title="Instagram" trends={sharedState.trends?.instagram} isLoading={isPending} />
-                <PlatformTrendsDisplay title="LinkedIn" trends={sharedState.trends?.linkedin} isLoading={isPending} />
-                <PlatformTrendsDisplay title="TikTok" trends={sharedState.trends?.tiktok} isLoading={isPending} />
+                <PlatformTrendsDisplay title="X (Twitter)" trends={sharedState.trends?.x} isLoading={isPending && !sharedState.trends} />
+                <PlatformTrendsDisplay title="Facebook" trends={sharedState.trends?.facebook} isLoading={isPending && !sharedState.trends} />
+                <PlatformTrendsDisplay title="Instagram" trends={sharedState.trends?.instagram} isLoading={isPending && !sharedState.trends} />
+                <PlatformTrendsDisplay title="LinkedIn" trends={sharedState.trends?.linkedin} isLoading={isPending && !sharedState.trends} />
+                <PlatformTrendsDisplay title="TikTok" trends={sharedState.trends?.tiktok} isLoading={isPending && !sharedState.trends} />
             </Accordion>
           ) : (
             <div className="text-center text-muted-foreground py-8">

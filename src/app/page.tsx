@@ -27,6 +27,7 @@ import type { GenerateContentCalendarOutput } from "@/ai/flows/generate-content-
 export interface SharedState {
   brandDetails: string;
   targetDemographic: string;
+  industry: string;
   audienceAnalysisReport: AudienceInsightsOutput | null;
   strategy: CreateSocialMediaStrategyOutput | null;
   trends: IdentifyTrendingTopicsOutput | null;
@@ -39,6 +40,7 @@ export default function Home() {
   const [sharedState, setSharedState] = useState<SharedState>({
     brandDetails: '',
     targetDemographic: '',
+    industry: '',
     audienceAnalysisReport: null,
     strategy: null,
     trends: null,
