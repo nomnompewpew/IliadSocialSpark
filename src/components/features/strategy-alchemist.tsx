@@ -4,7 +4,7 @@ import { useState, useTransition, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Loader2, Wand2 } from 'lucide-react';
+import { Loader2, Wand2, Clock, Hash, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -22,6 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { runStrategyAlchemist } from '@/app/actions';
 import type { CreateSocialMediaStrategyOutput } from '@/ai/flows/create-social-media-strategy';
 import { Skeleton } from '../ui/skeleton';
+import { Separator } from '../ui/separator';
 
 const formSchema = z.object({
   brandName: z.string().min(2, { message: 'Brand name is required.' }),
@@ -34,6 +35,50 @@ interface StrategyAlchemistProps {
   brandDescription: string;
   targetAudience: string;
 }
+
+const PlatformStrategyDisplay = ({ title, strategy, tactics }: { title: string, strategy?: string, tactics?: { postingTimes: string, hashtagStrategy: string, growthHacks: string } }) => {
+  if (!strategy || !tactics) return null;
+
+  return (
+    <AccordionItem value={title.toLowerCase()}>
+      <AccordionTrigger className='font-headline text-lg'>{title}</AccordionTrigger>
+      <AccordionContent className="prose prose-sm dark:prose-invert max-w-none space-y-4">
+        <div>
+          <h4 className="font-semibold text-base mb-2">Strategy</h4>
+          <p className='whitespace-pre-wrap'>{strategy}</p>
+        </div>
+        <Separator />
+        <div>
+          <h4 className="font-semibold text-base mb-3">Tactics</h4>
+          <div className="space-y-3">
+            <div className='flex items-start gap-3'>
+              <Clock className='h-5 w-5 mt-1 text-primary flex-shrink-0' />
+              <div>
+                <h5 className='font-semibold'>Posting Times</h5>
+                <p className='whitespace-pre-wrap'>{tactics.postingTimes}</p>
+              </div>
+            </div>
+            <div className='flex items-start gap-3'>
+              <Hash className='h-5 w-5 mt-1 text-primary flex-shrink-0' />
+              <div>
+                <h5 className='font-semibold'>Hashtag Strategy</h5>
+                <p className='whitespace-pre-wrap'>{tactics.hashtagStrategy}</p>
+              </div>
+            </div>
+            <div className='flex items-start gap-3'>
+              <TrendingUp className='h-5 w-5 mt-1 text-primary flex-shrink-0' />
+              <div>
+                <h5 className='font-semibold'>Growth Hacks</h5>
+                <p className='whitespace-pre-wrap'>{tactics.growthHacks}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </AccordionContent>
+    </AccordionItem>
+  )
+}
+
 
 export default function StrategyAlchemist({ brandDescription, targetAudience }: StrategyAlchemistProps) {
   const [isPending, startTransition] = useTransition();
@@ -119,7 +164,7 @@ export default function StrategyAlchemist({ brandDescription, targetAudience }: 
       </Card>
       <Card className="lg:col-span-2">
         <CardHeader>
-          <CardTitle className="font-headline">Platform Strategies</CardTitle>
+          <CardTitle className="font-headline">Platform Strategies & Tactics</CardTitle>
           <p className="text-muted-foreground">Your tailored strategies for each platform.</p>
         </CardHeader>
         <CardContent>
@@ -133,22 +178,10 @@ export default function StrategyAlchemist({ brandDescription, targetAudience }: 
           )}
           {result && (
             <Accordion type="multiple" defaultValue={['instagram']} className="w-full">
-              <AccordionItem value="instagram">
-                <AccordionTrigger className='font-headline'>Instagram Strategy</AccordionTrigger>
-                <AccordionContent className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">{result.instagramStrategy}</AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="tiktok">
-                <AccordionTrigger className='font-headline'>TikTok Strategy</AccordionTrigger>
-                <AccordionContent className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">{result.tiktokStrategy}</AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="linkedin">
-                <AccordionTrigger className='font-headline'>LinkedIn Strategy</AccordionTrigger>
-                <AccordionContent className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">{result.linkedinStrategy}</AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="x">
-                <AccordionTrigger className='font-headline'>X (Twitter) Strategy</AccordionTrigger>
-                <AccordionContent className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">{result.xStrategy}</AccordionContent>
-              </AccordionItem>
+              <PlatformStrategyDisplay title="Instagram" strategy={result.instagram.strategy} tactics={result.instagram.tactics} />
+              <PlatformStrategyDisplay title="TikTok" strategy={result.tiktok.strategy} tactics={result.tiktok.tactics} />
+              <PlatformStrategyDisplay title="LinkedIn" strategy={result.linkedin.strategy} tactics={result.linkedin.tactics} />
+              <PlatformStrategyDisplay title="X (Twitter)" strategy={result.x.strategy} tactics={result.x.tactics} />
             </Accordion>
           )}
           {!isPending && !result && (
