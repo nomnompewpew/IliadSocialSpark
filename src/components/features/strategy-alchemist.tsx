@@ -91,16 +91,16 @@ export default function StrategyAlchemist({ sharedState, onUpdate }: StrategyAlc
       brandName: '',
       industry: sharedState.industry || '',
       brandDescription: sharedState.brandDetails || '',
-      targetAudience: sharedState.targetDemographic || '',
+      targetAudience: sharedState.audienceAnalysisReport?.audienceAnalysisReport || sharedState.targetDemographic || '',
       goals: '',
     },
   });
 
   useEffect(() => {
     form.setValue('brandDescription', sharedState.brandDetails);
-    form.setValue('targetAudience', sharedState.targetDemographic);
+    form.setValue('targetAudience', sharedState.audienceAnalysisReport?.audienceAnalysisReport || sharedState.targetDemographic);
     form.setValue('industry', sharedState.industry);
-  }, [sharedState.brandDetails, sharedState.targetDemographic, sharedState.industry, form]);
+  }, [sharedState.brandDetails, sharedState.targetDemographic, sharedState.audienceAnalysisReport, sharedState.industry, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     onUpdate({ strategy: null, industry: values.industry });
@@ -147,14 +147,14 @@ export default function StrategyAlchemist({ sharedState, onUpdate }: StrategyAlc
               <FormField control={form.control} name="brandDescription" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Brand Description</FormLabel>
-                  <FormControl><Textarea placeholder="Describe your brand's mission and values." {...field} /></FormControl>
+                  <FormControl><Textarea placeholder="Describe your brand's mission and values." {...field} className="h-24" /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
               <FormField control={form.control} name="targetAudience" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Target Audience</FormLabel>
-                  <FormControl><Textarea placeholder="Who are you trying to reach?" {...field} /></FormControl>
+                  <FormControl><Textarea placeholder="Who are you trying to reach?" {...field} className="h-32" /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />

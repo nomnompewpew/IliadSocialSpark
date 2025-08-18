@@ -107,7 +107,7 @@ export default function AudienceInsights({ sharedState, onUpdate }: AudienceInsi
         return;
       }
       if (data) {
-        onUpdate({ brandDetails: data.brandDetails, targetDemographic: data.targetDemographic });
+        onUpdate({ brandDetails: data.brandDetails, targetDemographic: data.targetDemographic, audienceAnalysisReport: null });
         form.setValue('brandDetails', data.brandDetails, { shouldValidate: true });
         form.setValue('targetDemographic', data.targetDemographic, { shouldValidate: true });
         toast({ title: 'Autofill Successful', description: 'The fields have been populated.' });
@@ -127,7 +127,11 @@ export default function AudienceInsights({ sharedState, onUpdate }: AudienceInsi
         });
         return;
       }
-      onUpdate({ brandDetails: values.brandDetails, targetDemographic: values.targetDemographic, audienceAnalysisReport: data });
+      onUpdate({ 
+        brandDetails: values.brandDetails, 
+        targetDemographic: values.targetDemographic, // Keep original input
+        audienceAnalysisReport: data // Store the rich analysis
+      });
     });
   }
 
