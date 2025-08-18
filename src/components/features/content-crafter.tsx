@@ -62,8 +62,22 @@ export default function ContentCrafter({ sharedState, onUpdate }: ContentCrafter
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     onUpdate({ captions: null });
+    
+    const platformKey = values.platform.toLowerCase().replace(' (twitter)','') as keyof typeof sharedState.strategy;
+    const strategyForPlatform = sharedState.strategy ? sharedState.strategy[platformKey] : undefined;
+
+    const strategyPayload = strategyForPlatform ? {
+      platformStrategy: strategyForPlatform.strategy,
+      tactics: strategyForPlatform.tactics
+    } : undefined;
+
+
     startTransition(async () => {
-      const { data, error } = await runContentCrafter({ ...values, numberOfCaptions: 3 });
+      const { data, error } = await runContentCrafter({ 
+        ...values, 
+        numberOfCaptions: 3,
+        strategy: strategyPayload,
+      });
       if (error) {
         toast({ title: 'Error', description: error, variant: 'destructive' });
         return;
@@ -114,7 +128,7 @@ export default function ContentCrafter({ sharedState, onUpdate }: ContentCrafter
               <FormField control={form.control} name="topic" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Topic</FormLabel>
-                  <FormControl><Input placeholder="What is the content about?" {...field} /></FormControl>
+                  <FormControl><Input placeholder={sharedState.industry ? `A post about the ${sharedState.industry} industry` : "What is the content about?"} {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />

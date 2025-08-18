@@ -21,6 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { runViralHookGenerator } from '@/app/actions';
 import { Skeleton } from '../ui/skeleton';
 import type { SharedState } from '@/app/page';
+import { Input } from '../ui/input';
 
 const formSchema = z.object({
   niche: z.string().min(3, { message: 'Niche must be at least 3 characters.' }),
@@ -39,14 +40,15 @@ export default function ViralHookGenerator({ sharedState, onUpdate }: ViralHookG
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      niche: '',
-      audiencePsychology: sharedState.targetDemographic || '',
+      niche: sharedState.industry || '',
+      audiencePsychology: sharedState.audienceAnalysisReport?.audienceAnalysisReport || sharedState.targetDemographic || '',
     },
   });
 
   useEffect(() => {
-    form.setValue('audiencePsychology', sharedState.targetDemographic);
-  }, [sharedState.targetDemographic, form]);
+    form.setValue('audiencePsychology', sharedState.audienceAnalysisReport?.audienceAnalysisReport || sharedState.targetDemographic);
+    form.setValue('niche', sharedState.industry);
+  }, [sharedState.targetDemographic, sharedState.audienceAnalysisReport, sharedState.industry, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     onUpdate({ hooks: null });
@@ -72,9 +74,9 @@ export default function ViralHookGenerator({ sharedState, onUpdate }: ViralHookG
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField control={form.control} name="niche" render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Your Niche</FormLabel>
+                  <FormLabel>Your Niche / Industry</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="e.g., Personal finance for freelancers" {...field} />
+                    <Input placeholder="e.g., Personal finance for freelancers" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
