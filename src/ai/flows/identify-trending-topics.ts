@@ -14,7 +14,7 @@ import {z} from 'genkit';
 const IdentifyTrendingTopicsInputSchema = z.object({
   niche: z.string().describe('The specific niche or industry to identify trending topics for.'),
   platforms: z
-    .array(z.enum(['Instagram', 'TikTok', 'LinkedIn', 'X', 'Facebook']))
+    .array(z.string())
     .describe('The social media platforms to search for trending topics on.'),
 });
 export type IdentifyTrendingTopicsInput = z.infer<typeof IdentifyTrendingTopicsInputSchema>;
@@ -32,12 +32,15 @@ export async function identifyTrendingTopics(input: IdentifyTrendingTopicsInput)
 
 const prompt = ai.definePrompt({
   name: 'identifyTrendingTopicsPrompt',
-  input: {schema: IdentifyTrendingTopicsInputSchema},
+  input: {schema: z.object({
+    niche: z.string(),
+    platforms: z.string(),
+  })},
   output: {schema: IdentifyTrendingTopicsOutputSchema},
   prompt: `You are an expert social media analyst. Your job is to identify trending topics for a given niche on specified social media platforms.
 
   Niche: {{{niche}}}
-  Platforms: {{#each platforms}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
+  Platforms: {{{platforms}}}
 
   Analyze the current trends and provide a list of trending topics for each platform that are relevant to the niche.
   Return the trending topics in JSON format.
@@ -51,7 +54,10 @@ const identifyTrendingTopicsFlow = ai.defineFlow(
     outputSchema: IdentifyTrendingTopicsOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const {output} = await prompt({
+        niche: input.niche,
+        platforms: input.platforms.join(', '),
+    });
     return output!;
   }
 );
