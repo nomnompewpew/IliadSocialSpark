@@ -24,7 +24,7 @@ import type { IdentifyTrendingTopicsOutput } from '@/ai/flows/identify-trending-
 import { Skeleton } from '../ui/skeleton';
 import { Badge } from '../ui/badge';
 
-const platforms = ['Instagram', 'TikTok', 'LinkedIn', 'X'] as const;
+const platforms = ['Instagram', 'TikTok', 'LinkedIn', 'X', 'Facebook'] as const;
 
 const formSchema = z.object({
   niche: z.string().min(3, { message: 'Niche must be at least 3 characters.' }),

@@ -25,7 +25,7 @@ import type { GenerateContentCaptionsOutput } from '@/ai/flows/generate-content-
 import { Skeleton } from '../ui/skeleton';
 import { Separator } from '../ui/separator';
 
-const platforms = ['Instagram', 'TikTok', 'LinkedIn', 'X'] as const;
+const platforms = ['Instagram', 'TikTok', 'LinkedIn', 'X', 'Facebook'] as const;
 const formats = ['Carousel', 'Video', 'Story', 'Reel', 'Post'] as const;
 
 const formSchema = z.object({

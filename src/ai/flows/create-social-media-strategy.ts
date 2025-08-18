@@ -33,6 +33,7 @@ const CreateSocialMediaStrategyOutputSchema = z.object({
   tiktok: PlatformStrategySchema.describe('The strategy and tactics for TikTok.'),
   linkedin: PlatformStrategySchema.describe('The strategy and tactics for LinkedIn.'),
   x: PlatformStrategySchema.describe('The strategy and tactics for X (formerly Twitter).'),
+  facebook: PlatformStrategySchema.describe('The strategy and tactics for Facebook.'),
 });
 export type CreateSocialMediaStrategyOutput = z.infer<typeof CreateSocialMediaStrategyOutputSchema>;
 
@@ -44,7 +45,7 @@ const prompt = ai.definePrompt({
   name: 'createSocialMediaStrategyPrompt',
   input: {schema: CreateSocialMediaStrategyInputSchema},
   output: {schema: CreateSocialMediaStrategyOutputSchema},
-  prompt: `You are an expert social media strategist. Develop a comprehensive social media strategy and specific tactics for Instagram, TikTok, LinkedIn, and X (formerly Twitter) based on the following brand specifics:
+  prompt: `You are an expert social media strategist. Develop a comprehensive social media strategy and specific tactics for Instagram, TikTok, LinkedIn, X (formerly Twitter), and Facebook based on the following brand specifics:
 
 Brand Name: {{{brandName}}}
 Brand Description: {{{brandDescription}}}
@@ -58,7 +59,7 @@ For each platform, provide the following:
     *   **Hashtag Strategy**: Provide a mix of relevant niche, broad, and community-specific hashtags.
     *   **Growth Hacks**: List actionable, platform-specific tips to accelerate audience growth.
 
-Generate a complete response for all four platforms.
+Generate a complete response for all five platforms.
 `,
 });
 

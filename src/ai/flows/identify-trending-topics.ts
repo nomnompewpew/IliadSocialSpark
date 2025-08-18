@@ -14,7 +14,7 @@ import {z} from 'genkit';
 const IdentifyTrendingTopicsInputSchema = z.object({
   niche: z.string().describe('The specific niche or industry to identify trending topics for.'),
   platforms: z
-    .array(z.enum(['Instagram', 'TikTok', 'LinkedIn', 'X']))
+    .array(z.enum(['Instagram', 'TikTok', 'LinkedIn', 'X', 'Facebook']))
     .describe('The social media platforms to search for trending topics on.'),
 });
 export type IdentifyTrendingTopicsInput = z.infer<typeof IdentifyTrendingTopicsInputSchema>;

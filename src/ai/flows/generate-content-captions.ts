@@ -13,7 +13,7 @@ import {z} from 'genkit';
 
 const GenerateContentCaptionsInputSchema = z.object({
   brandDescription: z.string().describe('A detailed description of the brand, including its values, mission, and target audience.'),
-  platform: z.enum(['Instagram', 'TikTok', 'LinkedIn', 'X']).describe('The social media platform for which the content is being created.'),
+  platform: z.enum(['Instagram', 'TikTok', 'LinkedIn', 'X', 'Facebook']).describe('The social media platform for which the content is being created.'),
   contentFormat: z.enum(['Carousel', 'Video', 'Story', 'Reel', 'Post']).describe('The format of the content (e.g., carousel, video, story).'),
   topic: z.string().describe('The topic of the content.'),
   keywords: z.string().describe('Relevant keywords to include in the content.'),

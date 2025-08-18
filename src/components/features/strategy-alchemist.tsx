@@ -174,11 +174,13 @@ export default function StrategyAlchemist({ brandDescription, targetAudience }: 
               <Skeleton className="h-12 w-full" />
               <Skeleton className="h-12 w-full" />
               <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
             </div>
           )}
           {result && (
             <Accordion type="multiple" defaultValue={['instagram']} className="w-full">
               <PlatformStrategyDisplay title="Instagram" strategy={result.instagram.strategy} tactics={result.instagram.tactics} />
+              <PlatformStrategyDisplay title="Facebook" strategy={result.facebook.strategy} tactics={result.facebook.tactics} />
               <PlatformStrategyDisplay title="TikTok" strategy={result.tiktok.strategy} tactics={result.tiktok.tactics} />
               <PlatformStrategyDisplay title="LinkedIn" strategy={result.linkedin.strategy} tactics={result.linkedin.tactics} />
               <PlatformStrategyDisplay title="X (Twitter)" strategy={result.x.strategy} tactics={result.x.tactics} />
