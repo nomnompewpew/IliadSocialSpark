@@ -28,7 +28,7 @@ const platforms = ['Instagram', 'TikTok', 'LinkedIn', 'X'] as const;
 
 const formSchema = z.object({
   niche: z.string().min(3, { message: 'Niche must be at least 3 characters.' }),
-  platforms: z.array(z.string()).refine((value) => value.some((item) => item), {
+  platforms: z.array(z.enum(platforms)).refine((value) => value.some((item) => item), {
     message: 'You have to select at least one platform.',
   }),
 });
@@ -49,7 +49,7 @@ export default function TrendTracker() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     setResult(null);
     startTransition(async () => {
-      const { data, error } = await runTrendTracker(values as { niche: string; platforms: Array<'Instagram' | 'TikTok' | 'LinkedIn' | 'X'> });
+      const { data, error } = await runTrendTracker(values);
       if (error) {
         toast({ title: 'Error', description: error, variant: 'destructive' });
         return;
