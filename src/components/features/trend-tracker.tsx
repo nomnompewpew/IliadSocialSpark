@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Loader2, Wand2 } from 'lucide-react';
+import { Loader2, Wand2, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -22,13 +22,13 @@ import { useToast } from '@/hooks/use-toast';
 import { runTrendTracker } from '@/app/actions';
 import type { IdentifyTrendingTopicsOutput } from '@/ai/flows/identify-trending-topics';
 import { Skeleton } from '../ui/skeleton';
-import { Badge } from '../ui/badge';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 
 const platforms = ['Instagram', 'TikTok', 'LinkedIn', 'X', 'Facebook'] as const;
 
 const formSchema = z.object({
   niche: z.string().min(3, { message: 'Niche must be at least 3 characters.' }),
-  platforms: z.array(z.enum(platforms)).refine((value) => value.some((item) => item), {
+  platforms: z.array(z.string()).refine((value) => value.some((item) => item), {
     message: 'You have to select at least one platform.',
   }),
 });
@@ -113,40 +113,39 @@ export default function TrendTracker() {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline">Trending Topics</CardTitle>
+          <CardTitle className="font-headline">Trending Topics & Ideas</CardTitle>
           <p className="text-muted-foreground">Actionable insights into what's popular now.</p>
         </CardHeader>
         <CardContent>
           {isPending && (
-             <div className="space-y-6">
-                <div>
-                    <Skeleton className="h-6 w-1/4 mb-2" />
-                    <div className="flex flex-wrap gap-2">
-                        <Skeleton className="h-7 w-24" />
-                        <Skeleton className="h-7 w-32" />
-                        <Skeleton className="h-7 w-28" />
-                    </div>
-                </div>
-                 <div>
-                    <Skeleton className="h-6 w-1/4 mb-2" />
-                    <div className="flex flex-wrap gap-2">
-                        <Skeleton className="h-7 w-28" />
-                        <Skeleton className="h-7 w-24" />
-                        <Skeleton className="h-7 w-32" />
-                    </div>
-                </div>
+             <div className="space-y-4">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
             </div>
           )}
           {result && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               {Object.entries(result.trendingTopics).map(([platform, topics]) => (
                 <div key={platform}>
-                  <h3 className="font-headline text-lg mb-2">{platform}</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {topics.map((topic, index) => (
-                      <Badge key={index} variant="secondary" className="text-base px-3 py-1">{topic}</Badge>
-                    ))}
-                  </div>
+                  <h3 className="font-headline text-xl mb-3">{platform}</h3>
+                    <Accordion type="multiple" className="w-full space-y-2">
+                        {topics.map((item, index) => (
+                            <AccordionItem value={`item-${index}`} key={index} className="bg-secondary/50 px-4 rounded-md border-b-0">
+                                <AccordionTrigger className="py-3 font-semibold hover:no-underline">{item.topic}</AccordionTrigger>
+                                <AccordionContent className="prose prose-sm dark:prose-invert max-w-none space-y-3 pb-4">
+                                    <p>{item.explanation}</p>
+                                    <div className="flex items-start gap-3 rounded-md bg-background/50 p-3">
+                                        <Lightbulb className="h-5 w-5 mt-1 text-primary flex-shrink-0" />
+                                        <div>
+                                            <h5 className='font-semibold'>Content Idea</h5>
+                                            <p className='whitespace-pre-wrap'>{item.contentIdea}</p>
+                                        </div>
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                        ))}
+                    </Accordion>
                 </div>
               ))}
             </div>
