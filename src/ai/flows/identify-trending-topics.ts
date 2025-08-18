@@ -42,8 +42,9 @@ const prompt = ai.definePrompt({
     niche: z.string(),
     platforms: z.string(),
   })},
-  output: {
-    schema: IdentifyTrendingTopicsOutputSchema,
+  config: {
+    // Explicitly ask for JSON output.
+    format: 'json',
   },
   prompt: `You are an expert social media analyst. Your job is to identify trending topics for a given niche on specified social media platforms.
 
@@ -54,6 +55,8 @@ For each platform, provide a list of 3-5 relevant trending topics. For each topi
 1.  **topic**: The name of the trend.
 2.  **explanation**: A brief, clear explanation of why this topic is currently trending.
 3.  **contentIdea**: A concrete, actionable content idea for a post that leverages this trend for the specified niche.
+
+Your output should be a JSON object with a single key "trendingTopics", where the value is an object. Each key in this nested object should be a platform name, and its value should be an array of trend objects.
 `,
 });
 
@@ -64,10 +67,22 @@ const identifyTrendingTopicsFlow = ai.defineFlow(
     outputSchema: IdentifyTrendingTopicsOutputSchema,
   },
   async (input) => {
-    const {output} = await prompt({
+    const {text} = await prompt({
         niche: input.niche,
         platforms: input.platforms.join(', '),
     });
-    return output!;
+
+    // Manually parse the JSON output from the model.
+    const parsedOutput = JSON.parse(text);
+    
+    // Validate the parsed output against the Zod schema.
+    const validationResult = IdentifyTrendingTopicsOutputSchema.safeParse(parsedOutput);
+
+    if (!validationResult.success) {
+      console.error("AI output validation failed:", validationResult.error);
+      throw new Error("The AI returned data in an unexpected format.");
+    }
+    
+    return validationResult.data;
   }
 );
