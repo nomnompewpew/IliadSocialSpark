@@ -5,3 +5,7 @@ runConfig:
   # Increase this value if you'd like to automatically spin up
   # more instances in response to increased traffic.
   maxInstances: 1
+egressSettings:
+  # Allow the backend to connect to public URLs.
+  # https://firebase.google.com/docs/app-hosting/configure-network
+  egress: ALL_TRAFFIC
