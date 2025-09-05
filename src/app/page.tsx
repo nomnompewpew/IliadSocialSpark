@@ -6,20 +6,17 @@ import Header from "@/components/layout/header";
 import { 
   Users, 
   FlaskConical, 
-  TrendingUp,
   Flame, 
   PenSquare, 
   CalendarDays 
 } from "lucide-react";
 import AudienceInsights from "@/components/features/audience-insights";
 import StrategyAlchemist from "@/components/features/strategy-alchemist";
-import TrendTracker from "@/components/features/trend-tracker";
 import ViralHookGenerator from "@/components/features/viral-hook-generator";
 import ContentCrafter from "@/components/features/content-crafter";
 import CalendarCreator from "@/components/features/calendar-creator";
 import type { AudienceInsightsOutput } from '@/ai/flows/generate-audience-insights';
 import type { CreateSocialMediaStrategyOutput } from "@/ai/flows/create-social-media-strategy";
-import type { IdentifyTrendingTopicsOutput } from "@/ai/flows/identify-trending-topics";
 import type { GenerateViralHooksOutput } from "@/ai/flows/generate-viral-hooks";
 import type { GenerateContentCaptionsOutput } from "@/ai/flows/generate-content-captions";
 import type { GenerateContentCalendarOutput } from "@/ai/flows/generate-content-calendar";
@@ -30,7 +27,6 @@ export interface SharedState {
   industry: string;
   audienceAnalysisReport: AudienceInsightsOutput | null;
   strategy: CreateSocialMediaStrategyOutput | null;
-  trends: IdentifyTrendingTopicsOutput | null;
   hooks: GenerateViralHooksOutput | null;
   captions: GenerateContentCaptionsOutput | null;
   calendar: GenerateContentCalendarOutput | null;
@@ -43,7 +39,6 @@ export default function Home() {
     industry: '',
     audienceAnalysisReport: null,
     strategy: null,
-    trends: null,
     hooks: null,
     captions: null,
     calendar: null,
@@ -54,11 +49,11 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header />
-      <main className="container mx-auto px-4 py-8">
+      <main className="flex-grow container mx-auto px-4 py-8">
         <Tabs defaultValue="audience" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-6 h-auto">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-5 h-auto">
             <TabsTrigger value="audience" className="flex-col sm:flex-row gap-2 py-2">
               <Users className="h-5 w-5" />
               <span className="font-semibold">Audience</span>
@@ -66,10 +61,6 @@ export default function Home() {
             <TabsTrigger value="strategy" className="flex-col sm:flex-row gap-2 py-2">
               <FlaskConical className="h-5 w-5" />
               <span className="font-semibold">Strategy</span>
-            </TabsTrigger>
-            <TabsTrigger value="trends" className="flex-col sm:flex-row gap-2 py-2">
-              <TrendingUp className="h-5 w-5" />
-              <span className="font-semibold">Trends</span>
             </TabsTrigger>
             <TabsTrigger value="hooks" className="flex-col sm:flex-row gap-2 py-2">
               <Flame className="h-5 w-5" />
@@ -97,12 +88,6 @@ export default function Home() {
                onUpdate={handleStateUpdate}
             />
           </TabsContent>
-          <TabsContent value="trends" className="mt-6">
-            <TrendTracker 
-               sharedState={sharedState}
-               onUpdate={handleStateUpdate}
-            />
-          </TabsContent>
           <TabsContent value="hooks" className="mt-6">
             <ViralHookGenerator 
               sharedState={sharedState}
@@ -123,6 +108,11 @@ export default function Home() {
           </TabsContent>
         </Tabs>
       </main>
+      <footer className="py-4 border-t border-border/40">
+        <div className="container mx-auto text-center text-sm text-muted-foreground">
+          &copy; {new Date().getFullYear()} The Calton Group. All rights reserved.
+        </div>
+      </footer>
     </div>
   );
 }
