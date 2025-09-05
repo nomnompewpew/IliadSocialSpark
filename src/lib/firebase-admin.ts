@@ -1,15 +1,24 @@
 import * as admin from 'firebase-admin';
 
-const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
-  ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
-  : undefined;
+let db: admin.firestore.Firestore;
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
+const serviceAccountString = process.env.FIREBASE_SERVICE_ACCOUNT;
+
+if (serviceAccountString) {
+    try {
+        const serviceAccount = JSON.parse(serviceAccountString);
+        if (!admin.apps.length) {
+          admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+          });
+        }
+        db = admin.firestore();
+    } catch (e) {
+        console.error('Failed to parse Firebase service account:', e);
+    }
+} else {
+    console.warn('FIREBASE_SERVICE_ACCOUNT environment variable not set. Firestore functionality will be disabled.');
 }
 
-const db = admin.firestore();
-
+// @ts-ignore
 export { db };
