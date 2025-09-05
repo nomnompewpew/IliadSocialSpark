@@ -7,6 +7,8 @@ import { generateContentCaptions, GenerateContentCaptionsInput } from '@/ai/flow
 import { generateContentCalendar, GenerateContentCalendarInput } from '@/ai/flows/generate-content-calendar';
 import { autofillAudienceDetails, type AutofillAudienceDetailsInput } from '@/ai/flows/autofill-audience-details';
 import { identifyTrendingTopics, type IdentifyTrendingTopicsInput } from '@/ai/flows/identify-trending-topics';
+import { getJourneys as getJourneysFromDb, getJourney as getJourneyFromDb, saveJourney as saveJourneyToDb } from './firestore-actions';
+import type { SharedState } from './state';
 
 
 const handleError = (error: unknown) => {
@@ -76,4 +78,31 @@ export async function runTrendTracker(input: IdentifyTrendingTopicsInput) {
     } catch (error) {
         return handleError(error);
     }
+}
+
+export async function getJourneys() {
+  try {
+    const journeys = await getJourneysFromDb();
+    return { data: journeys };
+  } catch (error) {
+    return handleError(error);
+  }
+}
+
+export async function loadJourney(id: string) {
+  try {
+    const journey = await getJourneyFromDb(id);
+    return { data: journey };
+  } catch (error) {
+    return handleError(error);
+  }
+}
+
+export async function saveJourney(journey: SharedState, name: string, id?: string) {
+  try {
+    const journeyId = await saveJourneyToDb(journey, name, id);
+    return { data: { id: journeyId } };
+  } catch (error) {
+    return handleError(error);
+  }
 }

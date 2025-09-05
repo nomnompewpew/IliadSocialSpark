@@ -20,8 +20,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { runViralHookGenerator } from '@/app/actions';
 import { Skeleton } from '../ui/skeleton';
-import type { SharedState } from '@/app/page';
+import type { SharedState } from '@/app/state';
 import { Input } from '../ui/input';
+import { ClipboardCopy } from './clipboard-copy';
 
 const formSchema = z.object({
   niche: z.string().min(3, { message: 'Niche must be at least 3 characters.' }),
@@ -114,9 +115,12 @@ export default function ViralHookGenerator({ sharedState, onUpdate }: ViralHookG
             </div>
           )}
           {sharedState.hooks && (
-            <ul className="space-y-3 list-disc list-inside">
+            <ul className="space-y-3">
               {sharedState.hooks.viralHooks.map((hook, index) => (
-                <li key={index} className="bg-secondary/50 p-3 rounded-md">{hook}</li>
+                <li key={index} className="bg-secondary/50 p-3 rounded-md flex justify-between items-center gap-2">
+                  <span className='flex-grow'>{hook}</span>
+                  <ClipboardCopy textToCopy={hook} />
+                </li>
               ))}
             </ul>
           )}

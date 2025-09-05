@@ -6,39 +6,61 @@ import Header from "@/components/layout/header";
 import { 
   Users, 
   FlaskConical,
-  TrendingUp,
   Flame, 
   PenSquare, 
   CalendarDays 
 } from "lucide-react";
 import AudienceInsights from "@/components/features/audience-insights";
 import StrategyAlchemist from "@/components/features/strategy-alchemist";
-import TrendTracker from "@/components/features/trend-tracker";
 import ViralHookGenerator from "@/components/features/viral-hook-generator";
 import ContentCrafter from "@/components/features/content-crafter";
 import CalendarCreator from "@/components/features/calendar-creator";
 import type { SharedState } from "@/app/state";
+import TrendTracker from "@/components/features/trend-tracker";
+import { TrendingUp } from "lucide-react";
+
+export type Journey = {
+  id: string;
+  name: string;
+};
+
+const initialState: SharedState = {
+  brandDetails: '',
+  targetDemographic: '',
+  industry: '',
+  audienceAnalysisReport: null,
+  strategy: null,
+  trends: null,
+  hooks: null,
+  captions: null,
+  calendar: null,
+};
 
 export default function Home() {
-  const [sharedState, setSharedState] = useState<SharedState>({
-    brandDetails: '',
-    targetDemographic: '',
-    industry: '',
-    audienceAnalysisReport: null,
-    strategy: null,
-    trends: null,
-    hooks: null,
-    captions: null,
-    calendar: null,
-  });
+  const [sharedState, setSharedState] = useState<SharedState>(initialState);
+  const [currentJourney, setCurrentJourney] = useState<Journey | null>(null);
   
   const handleStateUpdate = (newState: Partial<SharedState>) => {
     setSharedState(prevState => ({ ...prevState, ...newState }));
   };
 
+  const handleLoadJourney = (journey: Journey, data: SharedState) => {
+    setCurrentJourney(journey);
+    setSharedState(data);
+  }
+
+  const handleSaveJourney = (journey: Journey) => {
+    setCurrentJourney(journey);
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <Header />
+      <Header 
+        sharedState={sharedState}
+        currentJourney={currentJourney}
+        onLoadJourney={handleLoadJourney}
+        onSaveJourney={handleSaveJourney}
+      />
       <main className="flex-grow container mx-auto px-4 py-8">
         <Tabs defaultValue="audience" className="w-full">
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-6 h-auto">

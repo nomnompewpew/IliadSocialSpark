@@ -20,7 +20,8 @@ import { useToast } from '@/hooks/use-toast';
 import { runCalendarCreator } from '@/app/actions';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from '../ui/skeleton';
-import type { SharedState } from '@/app/page';
+import type { SharedState } from '@/app/state';
+import { ClipboardCopy } from './clipboard-copy';
 
 const formSchema = z.object({
   brandDescription: z.string().min(10, { message: 'Brand description must be at least 10 characters.' }),
@@ -128,6 +129,7 @@ export default function CalendarCreator({ sharedState, onUpdate }: CalendarCreat
                     <TableHead>Type</TableHead>
                     <TableHead>Topic</TableHead>
                     <TableHead>Caption</TableHead>
+                    <TableHead className='text-right'>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -137,6 +139,9 @@ export default function CalendarCreator({ sharedState, onUpdate }: CalendarCreat
                       <TableCell>{entry.postType}</TableCell>
                       <TableCell>{entry.topic}</TableCell>
                       <TableCell className='whitespace-pre-wrap'>{entry.caption}</TableCell>
+                      <TableCell className='text-right'>
+                        <ClipboardCopy textToCopy={entry.caption} />
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

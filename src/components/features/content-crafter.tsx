@@ -23,7 +23,8 @@ import { useToast } from '@/hooks/use-toast';
 import { runContentCrafter } from '@/app/actions';
 import { Skeleton } from '../ui/skeleton';
 import { Separator } from '../ui/separator';
-import type { SharedState } from '@/app/page';
+import type { SharedState } from '@/app/state';
+import { ClipboardCopy } from './clipboard-copy';
 
 const platforms = ['Instagram', 'TikTok', 'LinkedIn', 'X', 'Facebook'] as const;
 const formats = ['Carousel', 'Video', 'Story', 'Reel', 'Post'] as const;
@@ -63,7 +64,7 @@ export default function ContentCrafter({ sharedState, onUpdate }: ContentCrafter
   function onSubmit(values: z.infer<typeof formSchema>) {
     onUpdate({ captions: null });
     
-    const platformKey = values.platform.toLowerCase().replace(' (twitter)','') as keyof typeof sharedState.strategy;
+    const platformKey = values.platform.toLowerCase().replace(/\s\(.*\)/, '') as keyof typeof sharedState.strategy;
     const strategyForPlatform = sharedState.strategy ? sharedState.strategy[platformKey] : undefined;
 
     const strategyPayload = strategyForPlatform ? {
@@ -166,7 +167,10 @@ export default function ContentCrafter({ sharedState, onUpdate }: ContentCrafter
             <div className="space-y-6">
               {sharedState.captions.captions.map((caption, index) => (
                 <div key={index}>
-                    <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">{caption}</div>
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap flex-grow">{caption}</div>
+                      <ClipboardCopy textToCopy={caption} />
+                    </div>
                     {index < sharedState.captions.captions.length - 1 && <Separator className="my-4" />}
                 </div>
               ))}

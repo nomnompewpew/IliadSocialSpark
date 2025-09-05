@@ -23,7 +23,8 @@ import { Skeleton } from '../ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import type { SharedState } from '@/app/page';
+import type { SharedState } from '@/app/state';
+import { ClipboardCopy } from './clipboard-copy';
 
 const formSchema = z.object({
   brandDetails: z.string().min(10, {
@@ -223,8 +224,15 @@ export default function AudienceInsights({ sharedState, onUpdate }: AudienceInsi
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline">Audience Analysis Report</CardTitle>
-          <p className="text-muted-foreground">The generated insights about your audience will appear here.</p>
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle className="font-headline">Audience Analysis Report</CardTitle>
+              <p className="text-muted-foreground">The generated insights about your audience will appear here.</p>
+            </div>
+            {sharedState.audienceAnalysisReport && (
+              <ClipboardCopy textToCopy={sharedState.audienceAnalysisReport.audienceAnalysisReport} />
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           {isPending && (

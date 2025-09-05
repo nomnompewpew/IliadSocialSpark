@@ -1,19 +1,59 @@
 "use client";
 
-import { Sparkles } from 'lucide-react';
+import { useState } from 'react';
+import { Sparkles, Save, FolderOpen } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import SaveJourneyDialog from '@/components/features/save-journey-dialog';
+import LoadJourneyDialog from '@/components/features/load-journey-dialog';
+import type { SharedState } from '@/app/state';
+import type { Journey } from '@/app/page';
 
-const Header = () => {
+interface HeaderProps {
+  sharedState: SharedState;
+  currentJourney: Journey | null;
+  onSaveJourney: (journey: Journey) => void;
+  onLoadJourney: (journey: Journey, data: SharedState) => void;
+}
+
+const Header = ({ sharedState, currentJourney, onSaveJourney, onLoadJourney }: HeaderProps) => {
+  const [isSaveOpen, setSaveOpen] = useState(false);
+  const [isLoadOpen, setLoadOpen] = useState(false);
+
   return (
-    <header className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 items-center px-4">
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-8 w-8 text-primary" />
-          <h1 className="text-2xl font-bold font-headline text-primary">
-            Iliad Social Spark
-          </h1>
+    <>
+      <header className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-8 w-8 text-primary" />
+            <h1 className="text-2xl font-bold font-headline text-primary">
+              Iliad Social Spark
+            </h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => setSaveOpen(true)}>
+              <Save className="mr-2 h-4 w-4" />
+              Save Journey
+            </Button>
+            <Button variant="outline" onClick={() => setLoadOpen(true)}>
+              <FolderOpen className="mr-2 h-4 w-4" />
+              Load Journey
+            </Button>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+      <SaveJourneyDialog 
+        isOpen={isSaveOpen} 
+        setIsOpen={setSaveOpen}
+        sharedState={sharedState}
+        currentJourney={currentJourney}
+        onSave={onSaveJourney}
+      />
+       <LoadJourneyDialog
+        isOpen={isLoadOpen}
+        setIsOpen={setLoadOpen}
+        onLoad={onLoadJourney}
+      />
+    </>
   );
 };
 
