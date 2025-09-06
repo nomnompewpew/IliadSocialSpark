@@ -161,6 +161,7 @@ function toast({ ...props }: Toast) {
       onOpenChange: (open) => {
         if (!open) dismiss()
       },
+      duration: props.variant === 'destructive' ? Infinity : 5000,
     },
   })
 
