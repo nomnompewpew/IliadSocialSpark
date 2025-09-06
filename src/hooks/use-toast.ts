@@ -9,7 +9,8 @@ import type {
 } from "@/components/ui/toast"
 
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+// This delay is for removing the toast from memory after it's been dismissed/closed.
+const TOAST_REMOVE_DELAY = 1000 * 60 * 60 * 24 // 24 hours
 
 type ToasterToast = ToastProps & {
   id: string
