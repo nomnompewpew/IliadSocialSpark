@@ -13,7 +13,7 @@ if (serviceAccountString) {
           });
         }
         db = admin.firestore();
-    } catch (e) {
+    } catch (e: any) {
         console.error('Failed to parse Firebase service account:', e);
     }
 } else {
