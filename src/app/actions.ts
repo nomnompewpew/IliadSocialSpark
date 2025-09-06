@@ -12,8 +12,8 @@ import type { SharedState } from './state';
 
 
 const handleError = (error: unknown) => {
-  console.error(error);
-  const message = error instanceof Error ? error.message : 'An unknown error occurred.';
+  console.error('An error occurred:', error);
+  const message = error instanceof Error ? error.message : String(error);
   return { error: message };
 };
 
