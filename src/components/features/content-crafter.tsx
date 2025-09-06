@@ -19,7 +19,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
 import { runContentCrafter } from '@/app/actions';
 import { Skeleton } from '../ui/skeleton';
 import { Separator } from '../ui/separator';
@@ -40,11 +39,11 @@ const formSchema = z.object({
 interface ContentCrafterProps {
   sharedState: SharedState;
   onUpdate: (newState: Partial<SharedState>) => void;
+  onError: (error: string) => void;
 }
 
-export default function ContentCrafter({ sharedState, onUpdate }: ContentCrafterProps) {
+export default function ContentCrafter({ sharedState, onUpdate, onError }: ContentCrafterProps) {
   const [isPending, startTransition] = useTransition();
-  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -80,7 +79,7 @@ export default function ContentCrafter({ sharedState, onUpdate }: ContentCrafter
         strategy: strategyPayload,
       });
       if (error) {
-        toast({ title: 'Error', description: error, variant: 'destructive' });
+        onError(error);
         return;
       }
       onUpdate({ captions: data });

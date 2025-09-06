@@ -16,7 +16,6 @@ import {
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
 import { runCalendarCreator } from '@/app/actions';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from '../ui/skeleton';
@@ -32,11 +31,11 @@ const formSchema = z.object({
 interface CalendarCreatorProps {
   sharedState: SharedState;
   onUpdate: (newState: Partial<SharedState>) => void;
+  onError: (error: string) => void;
 }
 
-export default function CalendarCreator({ sharedState, onUpdate }: CalendarCreatorProps) {
+export default function CalendarCreator({ sharedState, onUpdate, onError }: CalendarCreatorProps) {
   const [isPending, startTransition] = useTransition();
-  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -58,7 +57,7 @@ export default function CalendarCreator({ sharedState, onUpdate }: CalendarCreat
     startTransition(async () => {
       const { data, error } = await runCalendarCreator(values);
       if (error) {
-        toast({ title: 'Error', description: error, variant: 'destructive' });
+        onError(error);
         return;
       }
       onUpdate({ calendar: data });

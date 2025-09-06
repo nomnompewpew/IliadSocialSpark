@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Sparkles, Save, FolderOpen, Settings } from 'lucide-react';
+import { Sparkles, Save, FolderOpen, Settings, BellDot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SaveJourneyDialog from '@/components/features/save-journey-dialog';
 import LoadJourneyDialog from '@/components/features/load-journey-dialog';
@@ -43,8 +43,9 @@ const Header = ({ sharedState, currentJourney, errors, onSaveJourney, onLoadJour
               <FolderOpen className="mr-2 h-4 w-4" />
               Load Journey
             </Button>
-             <Button variant="outline" size="icon" onClick={() => setErrorLogOpen(true)}>
+             <Button variant="outline" size="icon" className="relative" onClick={() => setErrorLogOpen(true)}>
               <Settings className="h-4 w-4" />
+              {errors.length > 0 && <span className="absolute -top-1 -right-1 flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-destructive"></span></span> }
                <span className="sr-only">View Error Log</span>
             </Button>
           </div>

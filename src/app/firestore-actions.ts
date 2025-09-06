@@ -20,6 +20,10 @@ export interface JourneyListItem {
 }
 
 export async function saveJourney(journeyData: SharedState, name: string, id?: string): Promise<string> {
+  // This check is crucial. If db initialization failed, db will be undefined.
+  if (!db) {
+    throw new Error("Firestore is not initialized. Check your FIREBASE_SERVICE_ACCOUNT environment variable.");
+  }
   try {
     const dataToSave: Omit<JourneyDocument, 'savedAt'> = {
       name: name,
@@ -47,11 +51,15 @@ export async function saveJourney(journeyData: SharedState, name: string, id?: s
   } catch (e: any) {
     console.error("Error saving journey: ", e);
     // Re-throw the original error to be caught by the server action handler
+    // This ensures the detailed error message is sent to the client.
     throw e;
   }
 }
 
 export async function getJourneys(): Promise<JourneyListItem[]> {
+    if (!db) {
+      throw new Error("Firestore is not initialized. Check your FIREBASE_SERVICE_ACCOUNT environment variable.");
+    }
     try {
         const snapshot = await db.collection(JOURNEYS_COLLECTION).orderBy('savedAt', 'desc').get();
         if (snapshot.empty) {
@@ -67,11 +75,14 @@ export async function getJourneys(): Promise<JourneyListItem[]> {
         });
     } catch (e) {
         console.error("Error getting journeys: ", e);
-        throw new Error('Failed to retrieve journeys from Firestore.');
+        throw e;
     }
 }
 
 export async function getJourney(id: string): Promise<SharedState | null> {
+    if (!db) {
+      throw new Error("Firestore is not initialized. Check your FIREBASE_SERVICE_ACCOUNT environment variable.");
+    }
     try {
         const doc = await db.collection(JOURNEYS_COLLECTION).doc(id).get();
         if (!doc.exists) {
@@ -82,6 +93,6 @@ export async function getJourney(id: string): Promise<SharedState | null> {
         return JSON.parse(data.journeyData) as SharedState;
     } catch(e) {
         console.error("Error getting journey: ", e);
-        throw new Error('Failed to retrieve journey from Firestore.');
+        throw e;
     }
 }

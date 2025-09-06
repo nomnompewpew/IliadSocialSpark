@@ -17,7 +17,6 @@ import {
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
 import { runViralHookGenerator } from '@/app/actions';
 import { Skeleton } from '../ui/skeleton';
 import type { SharedState } from '@/app/state';
@@ -32,11 +31,11 @@ const formSchema = z.object({
 interface ViralHookGeneratorProps {
   sharedState: SharedState;
   onUpdate: (newState: Partial<SharedState>) => void;
+  onError: (error: string) => void;
 }
 
-export default function ViralHookGenerator({ sharedState, onUpdate }: ViralHookGeneratorProps) {
+export default function ViralHookGenerator({ sharedState, onUpdate, onError }: ViralHookGeneratorProps) {
   const [isPending, startTransition] = useTransition();
-  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -56,7 +55,7 @@ export default function ViralHookGenerator({ sharedState, onUpdate }: ViralHookG
     startTransition(async () => {
       const { data, error } = await runViralHookGenerator(values);
       if (error) {
-        toast({ title: 'Error', description: error, variant: 'destructive' });
+        onError(error);
         return;
       }
       onUpdate({ hooks: data });

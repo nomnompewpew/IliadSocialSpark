@@ -19,11 +19,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { useToast } from '@/hooks/use-toast';
 import { runTrendTracker } from '@/app/actions';
 import { Skeleton } from '../ui/skeleton';
 import { Separator } from '../ui/separator';
-import type { SharedState } from '@/app/page';
+import type { SharedState } from '@/app/state';
 
 const formSchema = z.object({
   industry: z.string().min(2, { message: 'Industry/Field is required.' }),
@@ -36,6 +35,7 @@ const formSchema = z.object({
 interface TrendTrackerProps {
   sharedState: SharedState;
   onUpdate: (newState: Partial<SharedState>) => void;
+  onError: (error: string) => void;
 }
 
 const PlatformTrendsDisplay = ({ title, trends, isLoading }: { title: string; trends?: { topic: string; description: string; contentIdea: string; }[]; isLoading?: boolean; }) => {
@@ -74,9 +74,8 @@ const PlatformTrendsDisplay = ({ title, trends, isLoading }: { title: string; tr
   )
 }
 
-export default function TrendTracker({ sharedState, onUpdate }: TrendTrackerProps) {
+export default function TrendTracker({ sharedState, onUpdate, onError }: TrendTrackerProps) {
   const [isPending, startTransition] = useTransition();
-  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -110,7 +109,7 @@ export default function TrendTracker({ sharedState, onUpdate }: TrendTrackerProp
     startTransition(async () => {
       const { data, error } = await runTrendTracker(values);
       if (error) {
-        toast({ title: 'Error', description: error, variant: 'destructive' });
+        onError(error);
         return;
       }
       onUpdate({ trends: data });

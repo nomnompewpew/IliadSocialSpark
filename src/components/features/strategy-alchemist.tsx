@@ -18,11 +18,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { useToast } from '@/hooks/use-toast';
 import { runStrategyAlchemist } from '@/app/actions';
 import { Skeleton } from '../ui/skeleton';
 import { Separator } from '../ui/separator';
-import type { SharedState } from '@/app/page';
+import type { SharedState } from '@/app/state';
 
 const formSchema = z.object({
   brandName: z.string().min(2, { message: 'Brand name is required.' }),
@@ -35,6 +34,7 @@ const formSchema = z.object({
 interface StrategyAlchemistProps {
   sharedState: SharedState;
   onUpdate: (newState: Partial<SharedState>) => void;
+  onError: (error: string) => void;
 }
 
 const PlatformStrategyDisplay = ({ title, strategy, tactics }: { title: string, strategy?: string, tactics?: { postingTimes: string, hashtagStrategy: string, growthHacks: string } }) => {
@@ -81,9 +81,8 @@ const PlatformStrategyDisplay = ({ title, strategy, tactics }: { title: string, 
 }
 
 
-export default function StrategyAlchemist({ sharedState, onUpdate }: StrategyAlchemistProps) {
+export default function StrategyAlchemist({ sharedState, onUpdate, onError }: StrategyAlchemistProps) {
   const [isPending, startTransition] = useTransition();
-  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -107,11 +106,7 @@ export default function StrategyAlchemist({ sharedState, onUpdate }: StrategyAlc
     startTransition(async () => {
       const { data, error } = await runStrategyAlchemist(values);
       if (error) {
-        toast({
-          title: 'Error',
-          description: error,
-          variant: 'destructive',
-        });
+        onError(error);
         return;
       }
       onUpdate({ strategy: data });

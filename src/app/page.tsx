@@ -135,30 +135,35 @@ export default function Home() {
             <StrategyAlchemist 
                sharedState={sharedState}
                onUpdate={handleStateUpdate}
+               onError={addError}
             />
           </TabsContent>
           <TabsContent value="trends" className="mt-6">
             <TrendTracker 
               sharedState={sharedState}
               onUpdate={handleStateUpdate}
+              onError={addError}
             />
           </TabsContent>
           <TabsContent value="hooks" className="mt-6">
             <ViralHookGenerator 
               sharedState={sharedState}
               onUpdate={handleStateUpdate}
+              onError={addError}
             />
           </TabsContent>
           <TabsContent value="content" className="mt-6">
             <ContentCrafter 
                sharedState={sharedState}
                onUpdate={handleStateUpdate}
+               onError={addError}
             />
           </TabsContent>
           <TabsContent value="calendar" className="mt-6">
             <CalendarCreator 
               sharedState={sharedState}
               onUpdate={handleStateUpdate}
+              onError={addError}
             />
           </TabsContent>
         </Tabs>
