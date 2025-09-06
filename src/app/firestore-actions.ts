@@ -44,9 +44,10 @@ export async function saveJourney(journeyData: SharedState, name: string, id?: s
       console.log('Journey saved with ID: ', docRef.id);
       return docRef.id;
     }
-  } catch (e) {
+  } catch (e: any) {
     console.error("Error saving journey: ", e);
-    throw new Error('Failed to save journey to Firestore.');
+    // Re-throw the original error to be caught by the server action handler
+    throw e;
   }
 }
 
