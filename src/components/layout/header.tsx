@@ -1,23 +1,28 @@
 "use client";
 
 import { useState } from 'react';
-import { Sparkles, Save, FolderOpen } from 'lucide-react';
+import { Sparkles, Save, FolderOpen, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SaveJourneyDialog from '@/components/features/save-journey-dialog';
 import LoadJourneyDialog from '@/components/features/load-journey-dialog';
-import type { SharedState } from '@/app/state';
+import ErrorLogDialog from '@/components/features/error-log-dialog';
+import type { SharedState, AppError } from '@/app/state';
 import type { Journey } from '@/app/page';
+
 
 interface HeaderProps {
   sharedState: SharedState;
   currentJourney: Journey | null;
+  errors: AppError[];
   onSaveJourney: (journey: Journey) => void;
   onLoadJourney: (journey: Journey, data: SharedState) => void;
+  onClearErrors: () => void;
 }
 
-const Header = ({ sharedState, currentJourney, onSaveJourney, onLoadJourney }: HeaderProps) => {
+const Header = ({ sharedState, currentJourney, errors, onSaveJourney, onLoadJourney, onClearErrors }: HeaderProps) => {
   const [isSaveOpen, setSaveOpen] = useState(false);
   const [isLoadOpen, setLoadOpen] = useState(false);
+  const [isErrorLogOpen, setErrorLogOpen] = useState(false);
 
   return (
     <>
@@ -38,6 +43,10 @@ const Header = ({ sharedState, currentJourney, onSaveJourney, onLoadJourney }: H
               <FolderOpen className="mr-2 h-4 w-4" />
               Load Journey
             </Button>
+             <Button variant="outline" size="icon" onClick={() => setErrorLogOpen(true)}>
+              <Settings className="h-4 w-4" />
+               <span className="sr-only">View Error Log</span>
+            </Button>
           </div>
         </div>
       </header>
@@ -52,6 +61,12 @@ const Header = ({ sharedState, currentJourney, onSaveJourney, onLoadJourney }: H
         isOpen={isLoadOpen}
         setIsOpen={setLoadOpen}
         onLoad={onLoadJourney}
+      />
+      <ErrorLogDialog
+        isOpen={isErrorLogOpen}
+        setIsOpen={setErrorLogOpen}
+        errors={errors}
+        onClear={onClearErrors}
       />
     </>
   );

@@ -15,9 +15,10 @@ import StrategyAlchemist from "@/components/features/strategy-alchemist";
 import ViralHookGenerator from "@/components/features/viral-hook-generator";
 import ContentCrafter from "@/components/features/content-crafter";
 import CalendarCreator from "@/components/features/calendar-creator";
-import type { SharedState } from "@/app/state";
+import type { SharedState, AppError } from "@/app/state";
 import TrendTracker from "@/components/features/trend-tracker";
 import { TrendingUp } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export type Journey = {
   id: string;
@@ -34,11 +35,38 @@ const initialState: SharedState = {
   hooks: null,
   captions: null,
   calendar: null,
+  errors: [],
 };
 
 export default function Home() {
   const [sharedState, setSharedState] = useState<SharedState>(initialState);
   const [currentJourney, setCurrentJourney] = useState<Journey | null>(null);
+  const { toast } = useToast();
+
+  const addError = (error: string) => {
+    const newError: AppError = {
+      message: error,
+      timestamp: new Date().toISOString(),
+    };
+    setSharedState(prevState => ({
+      ...prevState,
+      errors: [...prevState.errors, newError],
+    }));
+    toast({
+      title: 'An Error Occurred',
+      description: error,
+      variant: 'destructive',
+    });
+  }
+
+  const handleAction = async <T, U>(action: (input: T) => Promise<{ data?: U; error?: string }>, input: T, successCallback: (data: U) => void) => {
+    const { data, error } = await action(input);
+    if (error) {
+      addError(error);
+    } else if (data) {
+      successCallback(data);
+    }
+  };
   
   const handleStateUpdate = (newState: Partial<SharedState>) => {
     setSharedState(prevState => ({ ...prevState, ...newState }));
@@ -53,13 +81,19 @@ export default function Home() {
     setCurrentJourney(journey);
   }
 
+  const clearErrors = () => {
+    setSharedState(prevState => ({ ...prevState, errors: [] }));
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header 
         sharedState={sharedState}
         currentJourney={currentJourney}
+        errors={sharedState.errors}
         onLoadJourney={handleLoadJourney}
         onSaveJourney={handleSaveJourney}
+        onClearErrors={clearErrors}
       />
       <main className="flex-grow container mx-auto px-4 py-8">
         <Tabs defaultValue="audience" className="w-full">
@@ -94,6 +128,7 @@ export default function Home() {
             <AudienceInsights 
               sharedState={sharedState}
               onUpdate={handleStateUpdate}
+              onError={addError}
             />
           </TabsContent>
           <TabsContent value="strategy" className="mt-6">

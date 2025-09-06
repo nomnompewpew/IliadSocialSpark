@@ -17,7 +17,6 @@ import {
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
 import { runAudienceInsights, runAutofillAudienceDetails } from '@/app/actions';
 import { Skeleton } from '../ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
@@ -25,6 +24,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import type { SharedState } from '@/app/state';
 import { ClipboardCopy } from './clipboard-copy';
+import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
   brandDetails: z.string().min(10, {
@@ -38,9 +38,10 @@ const formSchema = z.object({
 interface AudienceInsightsProps {
   sharedState: SharedState;
   onUpdate: (newState: Partial<SharedState>) => void;
+  onError: (error: string) => void;
 }
 
-export default function AudienceInsights({ sharedState, onUpdate }: AudienceInsightsProps) {
+export default function AudienceInsights({ sharedState, onUpdate, onError }: AudienceInsightsProps) {
   const [isPending, startTransition] = useTransition();
   const [isAutofilling, startAutofillTransition] = useTransition();
   const [websiteUrl, setWebsiteUrl] = useState('');
@@ -86,11 +87,12 @@ export default function AudienceInsights({ sharedState, onUpdate }: AudienceInsi
         triggerAutofill(input);
       };
       reader.onerror = (error) => {
-        toast({ title: 'Error reading file', description: error.toString(), variant: 'destructive' });
+        const errorMessage = `Error reading file: ${error.toString()}`;
+        onError(errorMessage);
       };
     } else if (websiteUrl) {
       if (!websiteUrl.startsWith('http')) {
-        toast({ title: 'Invalid URL', description: 'Please enter a valid URL (e.g., https://example.com)', variant: 'destructive' });
+        onError('Invalid URL. Please enter a valid URL (e.g., https://example.com)');
         return;
       }
       input = { source: { type: 'url', data: websiteUrl } };
@@ -104,7 +106,7 @@ export default function AudienceInsights({ sharedState, onUpdate }: AudienceInsi
     startAutofillTransition(async () => {
       const { data, error } = await runAutofillAudienceDetails(input);
       if (error) {
-        toast({ title: 'Autofill Failed', description: error, variant: 'destructive' });
+        onError(error);
         return;
       }
       if (data) {
@@ -121,17 +123,13 @@ export default function AudienceInsights({ sharedState, onUpdate }: AudienceInsi
     startTransition(async () => {
       const { data, error } = await runAudienceInsights(values);
       if (error) {
-        toast({
-          title: 'Error',
-          description: error,
-          variant: 'destructive',
-        });
+        onError(error);
         return;
       }
       onUpdate({ 
         brandDetails: values.brandDetails, 
-        targetDemographic: values.targetDemographic, // Keep original input
-        audienceAnalysisReport: data // Store the rich analysis
+        targetDemographic: values.targetDemographic,
+        audienceAnalysisReport: data
       });
     });
   }

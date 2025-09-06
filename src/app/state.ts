@@ -5,6 +5,11 @@ import type { GenerateViralHooksOutput } from "@/ai/flows/generate-viral-hooks";
 import type { GenerateContentCaptionsOutput } from "@/ai/flows/generate-content-captions";
 import type { GenerateContentCalendarOutput } from "@/ai/flows/generate-content-calendar";
 
+export interface AppError {
+  message: string;
+  timestamp: string;
+}
+
 export interface SharedState {
   brandDetails: string;
   targetDemographic: string;
@@ -15,4 +20,5 @@ export interface SharedState {
   hooks: GenerateViralHooksOutput | null;
   captions: GenerateContentCaptionsOutput | null;
   calendar: GenerateContentCalendarOutput | null;
+  errors: AppError[];
 }
