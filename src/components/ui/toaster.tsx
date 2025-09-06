@@ -22,7 +22,7 @@ export function Toaster() {
               {title && <ToastTitle>{title}</ToastTitle>}
               {description && (
                 <ToastDescription>
-                  <pre className="whitespace-pre-wrap">
+                  <pre className="whitespace-pre-wrap font-sans text-sm">
                     {description as string}
                   </pre>
                 </ToastDescription>
