@@ -30,29 +30,27 @@ export async function saveJourney(journeyData: SharedState, name: string, id?: s
       journeyData: JSON.stringify(journeyData),
     };
     
+    const docData = {
+      ...dataToSave,
+      savedAt: new Date(),
+    }
+
     if (id) {
       // Update existing document
       const docRef = db.collection(JOURNEYS_COLLECTION).doc(id);
-      await docRef.update({
-        ...dataToSave,
-        savedAt: new Date(),
-      });
+      await docRef.update(docData);
       console.log('Journey updated with ID: ', id);
       return id;
     } else {
       // Create new document
-      const docRef = await db.collection(JOURNEYS_COLLECTION).add({
-        ...dataToSave,
-        savedAt: new Date(),
-      });
+      const docRef = await db.collection(JOURNEYS_COLLECTION).add(docData);
       console.log('Journey saved with ID: ', docRef.id);
       return docRef.id;
     }
   } catch (e: any) {
     console.error("Error saving journey: ", e);
-    // Re-throw the original error to be caught by the server action handler
-    // This ensures the detailed error message is sent to the client.
-    throw e;
+    // Re-throw a more descriptive error to be caught by the server action handler
+    throw new Error(`Failed to save to Firestore. Please ensure your FIREBASE_SERVICE_ACCOUNT in the .env file is correct and has Firestore permissions. Original Error: ${e.message}`);
   }
 }
 
@@ -73,9 +71,9 @@ export async function getJourneys(): Promise<JourneyListItem[]> {
                 savedAt: data.savedAt.toDate().toISOString(),
             }
         });
-    } catch (e) {
+    } catch (e: any) {
         console.error("Error getting journeys: ", e);
-        throw e;
+        throw new Error(`Failed to get journeys from Firestore. Please ensure your FIREBASE_SERVICE_ACCOUNT in the .env file is correct and has Firestore permissions. Original Error: ${e.message}`);
     }
 }
 
@@ -91,8 +89,8 @@ export async function getJourney(id: string): Promise<SharedState | null> {
         }
         const data = doc.data() as JourneyDocument;
         return JSON.parse(data.journeyData) as SharedState;
-    } catch(e) {
+    } catch(e: any) {
         console.error("Error getting journey: ", e);
-        throw e;
+        throw new Error(`Failed to get journey from Firestore. Please ensure your FIREBASE_SERVICE_ACCOUNT in the .env file is correct and has Firestore permissions. Original Error: ${e.message}`);
     }
 }
