@@ -59,32 +59,40 @@ const autofillAudienceDetailsFlow = ai.defineFlow(
       try {
         const response = await fetch(input.source.data, {
           headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            // Using a common browser user agent can help bypass simple bot detectors
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Connection': 'keep-alive',
           }
         });
         if (!response.ok) {
-          throw new Error(`Failed to fetch URL. The server responded with status: ${response.status} ${response.statusText}. The website may be blocking automated requests.`);
+           // Provide a more specific error message based on common failure reasons.
+           throw new Error(`Failed to fetch URL: ${response.status} ${response.statusText}. The website may be blocking automated requests or require a login. Try using a PDF of the content instead.`);
         }
         const html = await response.text();
         const root = parse(html);
         
+        // Remove script and style tags to clean up the content
+        root.querySelectorAll('script, style').forEach(el => el.remove());
+
         // Try to find the main content, but fall back to the body
         const mainContent = root.querySelector('main')?.text || root.querySelector('article')?.text;
         const bodyText = root.querySelector('body')?.text;
         
         let textToParse = mainContent || bodyText;
 
-        if (!textToParse || textToParse.trim().length === 0) {
-            throw new Error('Could not find any readable text content on the provided website.');
+        if (!textToParse || textToParse.trim().length < 100) { // Check for minimum content length
+            throw new Error('Could not find enough readable text on the provided website. The site may heavily rely on JavaScript for rendering. Please try a different URL or use a PDF.');
         }
 
-        // Clean up the text
+        // Clean up the text by removing excessive whitespace and newlines
         contentForPrompt = textToParse.replace(/\s\s+/g, ' ').trim();
 
       } catch (e: any) {
         console.error(`Error processing URL: ${e.message}`);
-        // Pass a more specific error message to the user
-        throw new Error(e.message || 'An unknown error occurred while processing the URL. The website might be offline or blocking requests.');
+        // Re-throw the original, more specific error message
+        throw new Error(e.message);
       }
     } else { // 'pdf'
       contentForPrompt = `{{media url="${input.source.data}"}}`;
