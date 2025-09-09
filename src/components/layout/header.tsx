@@ -6,23 +6,14 @@ import { Button } from '@/components/ui/button';
 import SaveJourneyDialog from '@/components/features/save-journey-dialog';
 import LoadJourneyDialog from '@/components/features/load-journey-dialog';
 import ErrorLogDialog from '@/components/features/error-log-dialog';
-import type { SharedState, AppError } from '@/app/state';
-import type { Journey } from '@/app/page';
+import { useAppContext } from '@/context/app-context';
 
 
-interface HeaderProps {
-  sharedState: SharedState;
-  currentJourney: Journey | null;
-  errors: AppError[];
-  onSaveJourney: (journey: Journey) => void;
-  onLoadJourney: (journey: Journey, data: SharedState) => void;
-  onClearErrors: () => void;
-}
-
-const Header = ({ sharedState, currentJourney, errors, onSaveJourney, onLoadJourney, onClearErrors }: HeaderProps) => {
+const Header = () => {
   const [isSaveOpen, setSaveOpen] = useState(false);
   const [isLoadOpen, setLoadOpen] = useState(false);
   const [isErrorLogOpen, setErrorLogOpen] = useState(false);
+  const { errors } = useAppContext();
 
   return (
     <>
@@ -54,20 +45,14 @@ const Header = ({ sharedState, currentJourney, errors, onSaveJourney, onLoadJour
       <SaveJourneyDialog 
         isOpen={isSaveOpen} 
         setIsOpen={setSaveOpen}
-        sharedState={sharedState}
-        currentJourney={currentJourney}
-        onSave={onSaveJourney}
       />
        <LoadJourneyDialog
         isOpen={isLoadOpen}
         setIsOpen={setLoadOpen}
-        onLoad={onLoadJourney}
       />
       <ErrorLogDialog
         isOpen={isErrorLogOpen}
         setIsOpen={setErrorLogOpen}
-        errors={errors}
-        onClear={onClearErrors}
       />
     </>
   );

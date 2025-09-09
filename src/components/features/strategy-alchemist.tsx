@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useEffect } from 'react';
+import { useTransition, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -18,10 +18,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { runStrategyAlchemist } from '@/app/actions';
 import { Skeleton } from '../ui/skeleton';
 import { Separator } from '../ui/separator';
-import type { SharedState } from '@/app/state';
+import { useAppContext } from '@/context/app-context';
+
 
 const formSchema = z.object({
   brandName: z.string().min(2, { message: 'Brand name is required.' }),
@@ -30,12 +30,6 @@ const formSchema = z.object({
   targetAudience: z.string().min(10, { message: 'Target audience must be at least 10 characters.' }),
   goals: z.string().min(5, { message: 'Goals are required.' }),
 });
-
-interface StrategyAlchemistProps {
-  sharedState: SharedState;
-  onUpdate: (newState: Partial<SharedState>) => void;
-  onError: (error: string) => void;
-}
 
 const PlatformStrategyDisplay = ({ title, strategy, tactics }: { title: string, strategy?: string, tactics?: { postingTimes: string, hashtagStrategy: string, growthHacks: string } }) => {
   if (!strategy || !tactics) return null;
@@ -81,35 +75,39 @@ const PlatformStrategyDisplay = ({ title, strategy, tactics }: { title: string, 
 }
 
 
-export default function StrategyAlchemist({ sharedState, onUpdate, onError }: StrategyAlchemistProps) {
+export default function StrategyAlchemist() {
   const [isPending, startTransition] = useTransition();
+  const {
+    brandDetails,
+    targetDemographic,
+    audienceAnalysisReport,
+    industry,
+    strategy,
+    updateState,
+    generateStrategy,
+  } = useAppContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       brandName: '',
-      industry: sharedState.industry || '',
-      brandDescription: sharedState.brandDetails || '',
-      targetAudience: sharedState.audienceAnalysisReport?.audienceAnalysisReport || sharedState.targetDemographic || '',
+      industry: industry || '',
+      brandDescription: brandDetails || '',
+      targetAudience: audienceAnalysisReport?.audienceAnalysisReport || targetDemographic || '',
       goals: '',
     },
   });
 
   useEffect(() => {
-    form.setValue('brandDescription', sharedState.brandDetails);
-    form.setValue('targetAudience', sharedState.audienceAnalysisReport?.audienceAnalysisReport || sharedState.targetDemographic);
-    form.setValue('industry', sharedState.industry);
-  }, [sharedState.brandDetails, sharedState.targetDemographic, sharedState.audienceAnalysisReport, sharedState.industry, form]);
+    form.setValue('brandDescription', brandDetails);
+    form.setValue('targetAudience', audienceAnalysisReport?.audienceAnalysisReport || targetDemographic);
+    form.setValue('industry', industry);
+  }, [brandDetails, targetDemographic, audienceAnalysisReport, industry, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    onUpdate({ strategy: null, industry: values.industry });
+    updateState({ strategy: null, industry: values.industry });
     startTransition(async () => {
-      const { data, error } = await runStrategyAlchemist(values);
-      if (error) {
-        onError(error);
-        return;
-      }
-      onUpdate({ strategy: data });
+      await generateStrategy(values);
     });
   }
 
@@ -183,16 +181,16 @@ export default function StrategyAlchemist({ sharedState, onUpdate, onError }: St
               <Skeleton className="h-12 w-full" />
             </div>
           )}
-          {sharedState.strategy && (
+          {strategy && (
             <Accordion type="multiple" defaultValue={['instagram']} className="w-full">
-              <PlatformStrategyDisplay title="Instagram" strategy={sharedState.strategy.instagram.strategy} tactics={sharedState.strategy.instagram.tactics} />
-              <PlatformStrategyDisplay title="Facebook" strategy={sharedState.strategy.facebook.strategy} tactics={sharedState.strategy.facebook.tactics} />
-              <PlatformStrategyDisplay title="TikTok" strategy={sharedState.strategy.tiktok.strategy} tactics={sharedState.strategy.tiktok.tactics} />
-              <PlatformStrategyDisplay title="LinkedIn" strategy={sharedState.strategy.linkedin.strategy} tactics={sharedState.strategy.linkedin.tactics} />
-              <PlatformStrategyDisplay title="X (Twitter)" strategy={sharedState.strategy.x.strategy} tactics={sharedState.strategy.x.tactics} />
+              <PlatformStrategyDisplay title="Instagram" strategy={strategy.instagram.strategy} tactics={strategy.instagram.tactics} />
+              <PlatformStrategyDisplay title="Facebook" strategy={strategy.facebook.strategy} tactics={strategy.facebook.tactics} />
+              <PlatformStrategyDisplay title="TikTok" strategy={strategy.tiktok.strategy} tactics={strategy.tiktok.tactics} />
+              <PlatformStrategyDisplay title="LinkedIn" strategy={strategy.linkedin.strategy} tactics={strategy.linkedin.tactics} />
+              <PlatformStrategyDisplay title="X (Twitter)" strategy={strategy.x.strategy} tactics={strategy.x.tactics} />
             </Accordion>
           )}
-          {!isPending && !sharedState.strategy && (
+          {!isPending && !strategy && (
             <div className="text-center text-muted-foreground py-8">
               Your comprehensive strategy awaits.
             </div>

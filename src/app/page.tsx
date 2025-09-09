@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/layout/header";
 import { 
@@ -8,93 +7,21 @@ import {
   FlaskConical,
   Flame, 
   PenSquare, 
-  CalendarDays 
+  CalendarDays,
+  TrendingUp
 } from "lucide-react";
 import AudienceInsights from "@/components/features/audience-insights";
 import StrategyAlchemist from "@/components/features/strategy-alchemist";
 import ViralHookGenerator from "@/components/features/viral-hook-generator";
 import ContentCrafter from "@/components/features/content-crafter";
 import CalendarCreator from "@/components/features/calendar-creator";
-import type { SharedState, AppError } from "@/app/state";
 import TrendTracker from "@/components/features/trend-tracker";
-import { TrendingUp } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-
-export type Journey = {
-  id: string;
-  name: string;
-};
-
-const initialState: SharedState = {
-  brandDetails: '',
-  targetDemographic: '',
-  industry: '',
-  audienceAnalysisReport: null,
-  strategy: null,
-  trends: null,
-  hooks: null,
-  captions: null,
-  calendar: null,
-  errors: [],
-};
 
 export default function Home() {
-  const [sharedState, setSharedState] = useState<SharedState>(initialState);
-  const [currentJourney, setCurrentJourney] = useState<Journey | null>(null);
-  const { toast } = useToast();
-
-  const addError = (error: string) => {
-    const newError: AppError = {
-      message: error,
-      timestamp: new Date().toISOString(),
-    };
-    setSharedState(prevState => ({
-      ...prevState,
-      errors: [...prevState.errors, newError],
-    }));
-    toast({
-      title: 'An Error Occurred',
-      description: error,
-      variant: 'destructive',
-    });
-  }
-
-  const handleAction = async <T, U>(action: (input: T) => Promise<{ data?: U; error?: string }>, input: T, successCallback: (data: U) => void) => {
-    const { data, error } = await action(input);
-    if (error) {
-      addError(error);
-    } else if (data) {
-      successCallback(data);
-    }
-  };
-  
-  const handleStateUpdate = (newState: Partial<SharedState>) => {
-    setSharedState(prevState => ({ ...prevState, ...newState }));
-  };
-
-  const handleLoadJourney = (journey: Journey, data: SharedState) => {
-    setCurrentJourney(journey);
-    setSharedState(data);
-  }
-
-  const handleSaveJourney = (journey: Journey) => {
-    setCurrentJourney(journey);
-  }
-
-  const clearErrors = () => {
-    setSharedState(prevState => ({ ...prevState, errors: [] }));
-  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <Header 
-        sharedState={sharedState}
-        currentJourney={currentJourney}
-        errors={sharedState.errors}
-        onLoadJourney={handleLoadJourney}
-        onSaveJourney={handleSaveJourney}
-        onClearErrors={clearErrors}
-      />
+      <Header />
       <main className="flex-grow container mx-auto px-4 py-8">
         <Tabs defaultValue="audience" className="w-full">
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-6 h-auto">
@@ -125,46 +52,22 @@ export default function Home() {
           </TabsList>
           
           <TabsContent value="audience" className="mt-6">
-            <AudienceInsights 
-              sharedState={sharedState}
-              onUpdate={handleStateUpdate}
-              onError={addError}
-            />
+            <AudienceInsights />
           </TabsContent>
           <TabsContent value="strategy" className="mt-6">
-            <StrategyAlchemist 
-               sharedState={sharedState}
-               onUpdate={handleStateUpdate}
-               onError={addError}
-            />
+            <StrategyAlchemist />
           </TabsContent>
           <TabsContent value="trends" className="mt-6">
-            <TrendTracker 
-              sharedState={sharedState}
-              onUpdate={handleStateUpdate}
-              onError={addError}
-            />
+            <TrendTracker />
           </TabsContent>
           <TabsContent value="hooks" className="mt-6">
-            <ViralHookGenerator 
-              sharedState={sharedState}
-              onUpdate={handleStateUpdate}
-              onError={addError}
-            />
+            <ViralHookGenerator />
           </TabsContent>
           <TabsContent value="content" className="mt-6">
-            <ContentCrafter 
-               sharedState={sharedState}
-               onUpdate={handleStateUpdate}
-               onError={addError}
-            />
+            <ContentCrafter />
           </TabsContent>
           <TabsContent value="calendar" className="mt-6">
-            <CalendarCreator 
-              sharedState={sharedState}
-              onUpdate={handleStateUpdate}
-              onError={addError}
-            />
+            <CalendarCreator />
           </TabsContent>
         </Tabs>
       </main>

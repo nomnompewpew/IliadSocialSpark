@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useEffect } from 'react';
+import { useTransition, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -19,10 +19,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { runTrendTracker } from '@/app/actions';
 import { Skeleton } from '../ui/skeleton';
 import { Separator } from '../ui/separator';
-import type { SharedState } from '@/app/state';
+import { useAppContext } from '@/context/app-context';
 
 const formSchema = z.object({
   industry: z.string().min(2, { message: 'Industry/Field is required.' }),
@@ -31,12 +30,6 @@ const formSchema = z.object({
   buyingHabits: z.string().optional(),
   entertainment: z.string().optional(),
 });
-
-interface TrendTrackerProps {
-  sharedState: SharedState;
-  onUpdate: (newState: Partial<SharedState>) => void;
-  onError: (error: string) => void;
-}
 
 const PlatformTrendsDisplay = ({ title, trends, isLoading }: { title: string; trends?: { topic: string; description: string; contentIdea: string; }[]; isLoading?: boolean; }) => {
     if (isLoading) {
@@ -74,13 +67,21 @@ const PlatformTrendsDisplay = ({ title, trends, isLoading }: { title: string; tr
   )
 }
 
-export default function TrendTracker({ sharedState, onUpdate, onError }: TrendTrackerProps) {
+export default function TrendTracker() {
   const [isPending, startTransition] = useTransition();
+  const {
+    industry,
+    brandDetails,
+    targetDemographic,
+    trends,
+    generateTrends,
+    updateState,
+  } = useAppContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      industry: sharedState.industry || '',
+      industry: industry || '',
       products: '',
       services: '',
       buyingHabits: '',
@@ -89,30 +90,24 @@ export default function TrendTracker({ sharedState, onUpdate, onError }: TrendTr
   });
 
   useEffect(() => {
-    if (sharedState.industry) {
-      form.setValue('industry', sharedState.industry);
+    if (industry) {
+      form.setValue('industry', industry);
     }
-    // Suggest keywords based on brand and audience details
-    if (sharedState.brandDetails) {
-        form.setValue('products', 'Suggest products based on: ' + sharedState.brandDetails);
-        form.setValue('services', 'Suggest services based on: ' + sharedState.brandDetails);
+    if (brandDetails) {
+        form.setValue('products', 'Suggest products based on: ' + brandDetails);
+        form.setValue('services', 'Suggest services based on: ' + brandDetails);
     }
-    if (sharedState.targetDemographic) {
-        form.setValue('buyingHabits', 'Suggest buying habits based on: ' + sharedState.targetDemographic);
-        form.setValue('entertainment', 'Suggest entertainment based on: ' + sharedState.targetDemographic);
+    if (targetDemographic) {
+        form.setValue('buyingHabits', 'Suggest buying habits based on: ' + targetDemographic);
+        form.setValue('entertainment', 'Suggest entertainment based on: ' + targetDemographic);
     }
-  }, [sharedState.industry, sharedState.brandDetails, sharedState.targetDemographic, form]);
+  }, [industry, brandDetails, targetDemographic, form]);
 
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    onUpdate({ trends: null });
+    updateState({ trends: null });
     startTransition(async () => {
-      const { data, error } = await runTrendTracker(values);
-      if (error) {
-        onError(error);
-        return;
-      }
-      onUpdate({ trends: data });
+      await generateTrends(values);
     });
   }
 
@@ -179,13 +174,13 @@ export default function TrendTracker({ sharedState, onUpdate, onError }: TrendTr
           <p className="text-muted-foreground">The latest trends, generated just for you.</p>
         </CardHeader>
         <CardContent>
-          {(isPending || sharedState.trends) ? (
+          {(isPending || trends) ? (
             <Accordion type="multiple" defaultValue={['x']} className="w-full">
-                <PlatformTrendsDisplay title="X (Twitter)" trends={sharedState.trends?.x} isLoading={isPending && !sharedState.trends} />
-                <PlatformTrendsDisplay title="Facebook" trends={sharedState.trends?.facebook} isLoading={isPending && !sharedState.trends} />
-                <PlatformTrendsDisplay title="Instagram" trends={sharedState.trends?.instagram} isLoading={isPending && !sharedState.trends} />
-                <PlatformTrendsDisplay title="LinkedIn" trends={sharedState.trends?.linkedin} isLoading={isPending && !sharedState.trends} />
-                <PlatformTrendsDisplay title="TikTok" trends={sharedState.trends?.tiktok} isLoading={isPending && !sharedState.trends} />
+                <PlatformTrendsDisplay title="X (Twitter)" trends={trends?.x} isLoading={isPending && !trends} />
+                <PlatformTrendsDisplay title="Facebook" trends={trends?.facebook} isLoading={isPending && !trends} />
+                <PlatformTrendsDisplay title="Instagram" trends={trends?.instagram} isLoading={isPending && !trends} />
+                <PlatformTrendsDisplay title="LinkedIn" trends={trends?.linkedin} isLoading={isPending && !trends} />
+                <PlatformTrendsDisplay title="TikTok" trends={trends?.tiktok} isLoading={isPending && !trends} />
             </Accordion>
           ) : (
             <div className="text-center text-muted-foreground py-8">

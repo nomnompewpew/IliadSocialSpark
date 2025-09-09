@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useEffect } from 'react';
+import { useTransition, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -17,48 +16,44 @@ import {
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { runViralHookGenerator } from '@/app/actions';
 import { Skeleton } from '../ui/skeleton';
-import type { SharedState } from '@/app/state';
 import { Input } from '../ui/input';
 import { ClipboardCopy } from './clipboard-copy';
+import { useAppContext } from '@/context/app-context';
 
 const formSchema = z.object({
   niche: z.string().min(3, { message: 'Niche must be at least 3 characters.' }),
   audiencePsychology: z.string().min(10, { message: 'Audience psychology must be at least 10 characters.' }),
 });
 
-interface ViralHookGeneratorProps {
-  sharedState: SharedState;
-  onUpdate: (newState: Partial<SharedState>) => void;
-  onError: (error: string) => void;
-}
-
-export default function ViralHookGenerator({ sharedState, onUpdate, onError }: ViralHookGeneratorProps) {
+export default function ViralHookGenerator() {
   const [isPending, startTransition] = useTransition();
+  const {
+    industry,
+    targetDemographic,
+    audienceAnalysisReport,
+    hooks,
+    generateViralHooks,
+    updateState,
+  } = useAppContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      niche: sharedState.industry || '',
-      audiencePsychology: sharedState.audienceAnalysisReport?.audienceAnalysisReport || sharedState.targetDemographic || '',
+      niche: industry || '',
+      audiencePsychology: audienceAnalysisReport?.audienceAnalysisReport || targetDemographic || '',
     },
   });
 
   useEffect(() => {
-    form.setValue('audiencePsychology', sharedState.audienceAnalysisReport?.audienceAnalysisReport || sharedState.targetDemographic);
-    form.setValue('niche', sharedState.industry);
-  }, [sharedState.targetDemographic, sharedState.audienceAnalysisReport, sharedState.industry, form]);
+    form.setValue('audiencePsychology', audienceAnalysisReport?.audienceAnalysisReport || targetDemographic);
+    form.setValue('niche', industry);
+  }, [targetDemographic, audienceAnalysisReport, industry, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    onUpdate({ hooks: null });
+    updateState({ hooks: null });
     startTransition(async () => {
-      const { data, error } = await runViralHookGenerator(values);
-      if (error) {
-        onError(error);
-        return;
-      }
-      onUpdate({ hooks: data });
+      await generateViralHooks(values);
     });
   }
 
@@ -113,9 +108,9 @@ export default function ViralHookGenerator({ sharedState, onUpdate, onError }: V
               <Skeleton className="h-5 w-full" />
             </div>
           )}
-          {sharedState.hooks && (
+          {hooks && (
             <ul className="space-y-3">
-              {sharedState.hooks.viralHooks.map((hook, index) => (
+              {hooks.viralHooks.map((hook, index) => (
                 <li key={index} className="bg-secondary/50 p-3 rounded-md flex justify-between items-center gap-2">
                   <span className='flex-grow'>{hook}</span>
                   <ClipboardCopy textToCopy={hook} />
@@ -123,7 +118,7 @@ export default function ViralHookGenerator({ sharedState, onUpdate, onError }: V
               ))}
             </ul>
           )}
-          {!isPending && !sharedState.hooks && (
+          {!isPending && !hooks && (
             <div className="text-center text-muted-foreground py-8">
               Viral hooks are ready to be discovered.
             </div>

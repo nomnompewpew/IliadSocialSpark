@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useEffect } from 'react';
+import { useTransition, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -19,11 +18,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { runContentCrafter } from '@/app/actions';
 import { Skeleton } from '../ui/skeleton';
 import { Separator } from '../ui/separator';
-import type { SharedState } from '@/app/state';
 import { ClipboardCopy } from './clipboard-copy';
+import { useAppContext } from '@/context/app-context';
 
 const platforms = ['Instagram', 'TikTok', 'LinkedIn', 'X', 'Facebook'] as const;
 const formats = ['Carousel', 'Video', 'Story', 'Reel', 'Post'] as const;
@@ -36,19 +34,22 @@ const formSchema = z.object({
   keywords: z.string().min(3, { message: 'Please provide at least one keyword.' }),
 });
 
-interface ContentCrafterProps {
-  sharedState: SharedState;
-  onUpdate: (newState: Partial<SharedState>) => void;
-  onError: (error: string) => void;
-}
-
-export default function ContentCrafter({ sharedState, onUpdate, onError }: ContentCrafterProps) {
+export default function ContentCrafter() {
   const [isPending, startTransition] = useTransition();
+  const { 
+    brandDetails, 
+    industry,
+    strategy,
+    captions,
+    generateContentCaptions,
+    updateState
+  } = useAppContext();
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      brandDescription: sharedState.brandDetails || '',
+      brandDescription: brandDetails || '',
       platform: 'Instagram',
       contentFormat: 'Post',
       topic: '',
@@ -57,32 +58,26 @@ export default function ContentCrafter({ sharedState, onUpdate, onError }: Conte
   });
 
   useEffect(() => {
-    form.setValue('brandDescription', sharedState.brandDetails);
-  }, [sharedState.brandDetails, form]);
+    form.setValue('brandDescription', brandDetails);
+  }, [brandDetails, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    onUpdate({ captions: null });
+    updateState({ captions: null });
     
-    const platformKey = values.platform.toLowerCase().replace(/\s\(.*\)/, '') as keyof typeof sharedState.strategy;
-    const strategyForPlatform = sharedState.strategy ? sharedState.strategy[platformKey] : undefined;
+    const platformKey = values.platform.toLowerCase().replace(/\s\(.*\)/, '') as keyof typeof strategy;
+    const strategyForPlatform = strategy ? strategy[platformKey] : undefined;
 
     const strategyPayload = strategyForPlatform ? {
       platformStrategy: strategyForPlatform.strategy,
       tactics: strategyForPlatform.tactics
     } : undefined;
 
-
     startTransition(async () => {
-      const { data, error } = await runContentCrafter({ 
+      await generateContentCaptions({ 
         ...values, 
         numberOfCaptions: 3,
         strategy: strategyPayload,
       });
-      if (error) {
-        onError(error);
-        return;
-      }
-      onUpdate({ captions: data });
     });
   }
 
@@ -128,7 +123,7 @@ export default function ContentCrafter({ sharedState, onUpdate, onError }: Conte
               <FormField control={form.control} name="topic" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Topic</FormLabel>
-                  <FormControl><Input placeholder={sharedState.industry ? `A post about the ${sharedState.industry} industry` : "What is the content about?"} {...field} /></FormControl>
+                  <FormControl><Input placeholder={industry ? `A post about the ${industry} industry` : "What is the content about?"} {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
@@ -162,20 +157,20 @@ export default function ContentCrafter({ sharedState, onUpdate, onError }: Conte
               <div className='space-y-2'><Skeleton className="h-4 w-1/4" /><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-5/6" /></div>
             </div>
           )}
-          {sharedState.captions && (
+          {captions && (
             <div className="space-y-6">
-              {sharedState.captions.captions.map((caption, index) => (
+              {captions.captions.map((caption, index) => (
                 <div key={index}>
                     <div className="flex justify-between items-start gap-4">
                       <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap flex-grow">{caption}</div>
                       <ClipboardCopy textToCopy={caption} />
                     </div>
-                    {index < sharedState.captions.captions.length - 1 && <Separator className="my-4" />}
+                    {index < captions.captions.length - 1 && <Separator className="my-4" />}
                 </div>
               ))}
             </div>
           )}
-          {!isPending && !sharedState.captions && (
+          {!isPending && !captions && (
             <div className="text-center text-muted-foreground py-8">
               Your next viral post starts here.
             </div>

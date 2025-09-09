@@ -12,53 +12,47 @@ import {
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { getJourneys, loadJourney } from '@/app/actions';
-import type { Journey } from '@/app/page';
-import type { SharedState } from '@/app/state';
 import { Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
-
-interface JourneyListItem {
-  id: string;
-  name: string;
-  savedAt: string;
-}
+import type { JourneyListItem } from '@/context/app-context';
+import { useAppContext } from '@/context/app-context';
 
 interface LoadJourneyDialogProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  onLoad: (journey: Journey, data: SharedState) => void;
 }
 
-export default function LoadJourneyDialog({ isOpen, setIsOpen, onLoad }: LoadJourneyDialogProps) {
+export default function LoadJourneyDialog({ isOpen, setIsOpen }: LoadJourneyDialogProps) {
   const [journeys, setJourneys] = useState<JourneyListItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedJourneyId, setSelectedJourneyId] = useState<string | null>(null);
   const { toast } = useToast();
+  const { addError, loadFullJourney } = useAppContext();
 
   useEffect(() => {
     if (isOpen) {
       setIsLoading(true);
       getJourneys().then(({ data, error }) => {
         if (error) {
-          toast({ title: 'Error fetching journeys', description: error, variant: 'destructive' });
+          addError(error);
         } else if(data) {
           setJourneys(data);
         }
         setIsLoading(false);
       });
     }
-  }, [isOpen, toast]);
+  }, [isOpen, toast, addError]);
 
   const handleLoad = async () => {
     if (!selectedJourneyId) return;
     setIsLoading(true);
     const { data, error } = await loadJourney(selectedJourneyId);
     if (error) {
-        toast({ title: 'Error loading journey', description: error, variant: 'destructive' });
+        addError(error);
     } else if (data) {
         const selectedJourney = journeys.find(j => j.id === selectedJourneyId);
         if (selectedJourney) {
-            onLoad({ id: selectedJourney.id, name: selectedJourney.name }, data);
+            loadFullJourney({ id: selectedJourney.id, name: selectedJourney.name }, data);
             toast({ title: 'Journey Loaded', description: `Successfully loaded "${selectedJourney.name}".` });
             setIsOpen(false);
         }

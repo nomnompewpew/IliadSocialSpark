@@ -13,29 +13,23 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { saveJourney } from '@/app/actions';
-import type { SharedState } from '@/app/state';
-import type { Journey } from '@/app/page';
 import { Loader2 } from 'lucide-react';
+import { useAppContext } from '@/context/app-context';
 
 interface SaveJourneyDialogProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  sharedState: SharedState;
-  currentJourney: Journey | null;
-  onSave: (journey: Journey) => void;
 }
 
-export default function SaveJourneyDialog({ isOpen, setIsOpen, sharedState, currentJourney, onSave }: SaveJourneyDialogProps) {
+export default function SaveJourneyDialog({ isOpen, setIsOpen }: SaveJourneyDialogProps) {
   const [clientName, setClientName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+  const { currentJourney, saveCurrentJourney, saveAsNewJourney } = useAppContext();
 
   useEffect(() => {
-    if (currentJourney?.name) {
-      setClientName(currentJourney.name);
-    } else {
-      setClientName('');
+    if (isOpen) {
+      setClientName(currentJourney?.name || '');
     }
   }, [currentJourney, isOpen]);
 
@@ -45,12 +39,9 @@ export default function SaveJourneyDialog({ isOpen, setIsOpen, sharedState, curr
       return;
     }
     setIsSaving(true);
-    const { data, error } = await saveJourney(sharedState, clientName, currentJourney?.id);
-    if (error) {
-      toast({ title: 'Error saving journey', description: error, variant: 'destructive' });
-    } else if (data) {
-      onSave({ id: data.id, name: clientName });
-      toast({ title: 'Journey Saved!', description: `"${clientName}" has been successfully saved.` });
+    const success = await saveCurrentJourney(clientName);
+    if (success) {
+      toast({ title: 'Journey Updated!', description: `"${clientName}" has been successfully updated.` });
       setIsOpen(false);
     }
     setIsSaving(false);
@@ -62,13 +53,10 @@ export default function SaveJourneyDialog({ isOpen, setIsOpen, sharedState, curr
       return;
     }
     setIsSaving(true);
-    const { data, error } = await saveJourney(sharedState, clientName); // No ID to force new save
-    if (error) {
-      toast({ title: 'Error saving journey', description: error, variant: 'destructive' });
-    } else if (data) {
-      onSave({ id: data.id, name: clientName });
-      toast({ title: 'Journey Saved as New!', description: `A new journey "${clientName}" has been created.` });
-      setIsOpen(false);
+    const success = await saveAsNewJourney(clientName);
+    if (success) {
+        toast({ title: 'Journey Saved as New!', description: `A new journey "${clientName}" has been created.` });
+        setIsOpen(false);
     }
     setIsSaving(false);
   }

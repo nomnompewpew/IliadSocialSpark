@@ -17,14 +17,13 @@ import {
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { runAudienceInsights, runAutofillAudienceDetails } from '@/app/actions';
 import { Skeleton } from '../ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import type { SharedState } from '@/app/state';
 import { ClipboardCopy } from './clipboard-copy';
 import { useToast } from '@/hooks/use-toast';
+import { useAppContext } from '@/context/app-context';
 
 const formSchema = z.object({
   brandDetails: z.string().min(10, {
@@ -35,31 +34,34 @@ const formSchema = z.object({
   }).max(2000, { message: 'Target demographic must be at most 2000 characters.' }),
 });
 
-interface AudienceInsightsProps {
-  sharedState: SharedState;
-  onUpdate: (newState: Partial<SharedState>) => void;
-  onError: (error: string) => void;
-}
-
-export default function AudienceInsights({ sharedState, onUpdate, onError }: AudienceInsightsProps) {
+export default function AudienceInsights() {
   const [isPending, startTransition] = useTransition();
   const [isAutofilling, startAutofillTransition] = useTransition();
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const { toast } = useToast();
+  const { 
+    brandDetails, 
+    targetDemographic, 
+    audienceAnalysisReport,
+    generateAudienceInsights,
+    autofillAudienceDetails,
+    updateState,
+    addError
+  } = useAppContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      brandDetails: sharedState.brandDetails || '',
-      targetDemographic: sharedState.targetDemographic || '',
+      brandDetails: brandDetails || '',
+      targetDemographic: targetDemographic || '',
     },
   });
 
   useEffect(() => {
-    form.setValue('brandDetails', sharedState.brandDetails);
-    form.setValue('targetDemographic', sharedState.targetDemographic);
-  }, [sharedState, form]);
+    form.setValue('brandDetails', brandDetails);
+    form.setValue('targetDemographic', targetDemographic);
+  }, [brandDetails, targetDemographic, form]);
   
 
   const handlePdfUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,11 +90,11 @@ export default function AudienceInsights({ sharedState, onUpdate, onError }: Aud
       };
       reader.onerror = (error) => {
         const errorMessage = `Error reading file: ${error.toString()}`;
-        onError(errorMessage);
+        addError(errorMessage);
       };
     } else if (websiteUrl) {
       if (!websiteUrl.startsWith('http')) {
-        onError('Invalid URL. Please enter a valid URL (e.g., https://example.com)');
+        addError('Invalid URL. Please enter a valid URL (e.g., https://example.com)');
         return;
       }
       input = { source: { type: 'url', data: websiteUrl } };
@@ -104,33 +106,19 @@ export default function AudienceInsights({ sharedState, onUpdate, onError }: Aud
 
   const triggerAutofill = (input: any) => {
     startAutofillTransition(async () => {
-      const { data, error } = await runAutofillAudienceDetails(input);
-      if (error) {
-        onError(error);
-        return;
-      }
-      if (data) {
-        onUpdate({ brandDetails: data.brandDetails, targetDemographic: data.targetDemographic, audienceAnalysisReport: null });
-        form.setValue('brandDetails', data.brandDetails, { shouldValidate: true });
-        form.setValue('targetDemographic', data.targetDemographic, { shouldValidate: true });
+      const result = await autofillAudienceDetails(input);
+      if (result) {
+        form.setValue('brandDetails', result.brandDetails, { shouldValidate: true });
+        form.setValue('targetDemographic', result.targetDemographic, { shouldValidate: true });
         toast({ title: 'Autofill Successful', description: 'The fields have been populated.' });
       }
     });
   }
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    onUpdate({ audienceAnalysisReport: null });
+    updateState({ audienceAnalysisReport: null });
     startTransition(async () => {
-      const { data, error } = await runAudienceInsights(values);
-      if (error) {
-        onError(error);
-        return;
-      }
-      onUpdate({ 
-        brandDetails: values.brandDetails, 
-        targetDemographic: values.targetDemographic,
-        audienceAnalysisReport: data
-      });
+      await generateAudienceInsights(values);
     });
   }
 
@@ -227,8 +215,8 @@ export default function AudienceInsights({ sharedState, onUpdate, onError }: Aud
               <CardTitle className="font-headline">Audience Analysis Report</CardTitle>
               <p className="text-muted-foreground">The generated insights about your audience will appear here.</p>
             </div>
-            {sharedState.audienceAnalysisReport && (
-              <ClipboardCopy textToCopy={sharedState.audienceAnalysisReport.audienceAnalysisReport} />
+            {audienceAnalysisReport && (
+              <ClipboardCopy textToCopy={audienceAnalysisReport.audienceAnalysisReport} />
             )}
           </div>
         </CardHeader>
@@ -245,12 +233,12 @@ export default function AudienceInsights({ sharedState, onUpdate, onError }: Aud
               <Skeleton className="h-4 w-full" />
             </div>
           )}
-          {sharedState.audienceAnalysisReport && (
+          {audienceAnalysisReport && (
              <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">
-              {sharedState.audienceAnalysisReport.audienceAnalysisReport}
+              {audienceAnalysisReport.audienceAnalysisReport}
             </div>
           )}
-          {!isPending && !sharedState.audienceAnalysisReport && (
+          {!isPending && !audienceAnalysisReport && (
             <div className="text-center text-muted-foreground py-8">
               Your report is waiting to be generated.
             </div>

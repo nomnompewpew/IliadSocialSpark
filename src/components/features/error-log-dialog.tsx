@@ -12,20 +12,19 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { ClipboardCopy } from './clipboard-copy';
-import type { AppError } from '@/app/state';
 import { format } from 'date-fns';
+import { useAppContext } from '@/context/app-context';
 
 interface ErrorLogDialogProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  errors: AppError[];
-  onClear: () => void;
 }
 
-export default function ErrorLogDialog({ isOpen, setIsOpen, errors, onClear }: ErrorLogDialogProps) {
+export default function ErrorLogDialog({ isOpen, setIsOpen }: ErrorLogDialogProps) {
+  const { errors, clearErrors } = useAppContext();
   
   const handleClear = () => {
-    onClear();
+    clearErrors();
     setIsOpen(false);
   }
 

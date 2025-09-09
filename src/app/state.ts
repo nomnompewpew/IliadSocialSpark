@@ -10,6 +10,11 @@ export interface AppError {
   timestamp: string;
 }
 
+export interface Journey {
+  id: string;
+  name: string;
+}
+
 export interface SharedState {
   brandDetails: string;
   targetDemographic: string;
@@ -21,4 +26,5 @@ export interface SharedState {
   captions: GenerateContentCaptionsOutput | null;
   calendar: GenerateContentCalendarOutput | null;
   errors: AppError[];
+  currentJourney: Journey | null;
 }
