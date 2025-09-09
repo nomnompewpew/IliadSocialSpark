@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Sparkles, Save, FolderOpen, Settings, BellDot } from 'lucide-react';
+import { Sparkles, Save, FolderOpen, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SaveJourneyDialog from '@/components/features/save-journey-dialog';
 import LoadJourneyDialog from '@/components/features/load-journey-dialog';
