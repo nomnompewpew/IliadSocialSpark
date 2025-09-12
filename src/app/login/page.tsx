@@ -23,6 +23,11 @@ export default function LoginPage() {
           "Google Sign-In is not enabled for this Firebase project. " +
           "Please go to your Firebase Console -> Authentication -> Sign-in method -> Add new provider, and enable Google."
         );
+      } else if (error.code === 'auth/unauthorized-domain') {
+        setAuthError(
+          `This domain (${window.location.hostname}) is not authorized for authentication. ` +
+          "Please go to your Firebase Console -> Authentication -> Settings -> Authorized domains, and add this domain."
+        );
       } else {
         setAuthError("An unexpected error occurred during sign-in. Please try again.");
       }
