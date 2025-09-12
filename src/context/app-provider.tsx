@@ -6,7 +6,7 @@ import type { SharedState, AppError, Journey } from '@/app/state';
 import { useToast } from '@/hooks/use-toast';
 import { 
   runAudienceInsights, 
-  runStrategyAlchemist, 
+  runStrategyAlchemist,
   runViralHookGenerator,
   runContentCrafter,
   runCalendarCreator,
