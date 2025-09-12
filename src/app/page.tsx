@@ -16,8 +16,17 @@ import ViralHookGenerator from "@/components/features/viral-hook-generator";
 import ContentCrafter from "@/components/features/content-crafter";
 import CalendarCreator from "@/components/features/calendar-creator";
 import TrendTracker from "@/components/features/trend-tracker";
+import { useAuth } from "@/context/auth-context";
 
 export default function Home() {
+  const { user, loading, isTeamMember } = useAuth();
+
+  // The AuthProvider now handles the main loading and redirect logic.
+  // This check is a safeguard to prevent content flashing for non-team members
+  // before the AuthProvider's final state is resolved.
+  if (loading || !user || !isTeamMember) {
+    return null; 
+  }
 
   return (
       <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -33,7 +42,7 @@ export default function Home() {
                 <FlaskConical className="h-5 w-5" />
                 <span className="font-semibold">Strategy</span>
               </TabsTrigger>
-              <TabsTrigger value="trends" className="flex-col sm:flex-row gap-2 py-2">
+              <TabsTrigger value="trends" className="flex-col sm-flex-row gap-2 py-2">
                 <TrendingUp className="h-5 w-5" />
                 <span className="font-semibold">Trends</span>
               </TabsTrigger>
