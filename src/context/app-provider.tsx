@@ -144,7 +144,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [state, addError, updateState]);
 
   const saveAsNewJourney = useCallback(async (name: string) => {
-    const { data, error } = await saveJourney(state, name); // No ID forces a new document
+    // Pass undefined for the ID to force creation of a new document
+    const { data, error } = await saveJourney(state, name, undefined); 
     if (error) {
       addError(error);
       return false;
@@ -169,7 +170,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     autofillAudienceDetails,
     generateStrategy,
     generateTrends,
-generateViralHooks,
+    generateViralHooks,
     generateContentCaptions,
     generateContentCalendar,
     saveCurrentJourney,
