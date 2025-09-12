@@ -2,7 +2,6 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { AppProvider } from '@/context/app-provider';
-import { AuthProvider } from '@/context/auth-context';
 
 export const metadata: Metadata = {
   title: 'Iliad Social Spark',
@@ -23,9 +22,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased" suppressHydrationWarning={true}>
         <AppProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
+          {children}
         </AppProvider>
         <Toaster />
       </body>
