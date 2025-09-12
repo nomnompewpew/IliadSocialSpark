@@ -21,6 +21,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Skeleton } from '../ui/skeleton';
 import { Separator } from '../ui/separator';
 import { useAppContext } from '@/context/app-context';
+import { TranslateButton } from './translate-button';
 
 
 const formSchema = z.object({
@@ -39,7 +40,10 @@ const PlatformStrategyDisplay = ({ title, strategy, tactics }: { title: string, 
       <AccordionTrigger className='font-headline text-lg'>{title}</AccordionTrigger>
       <AccordionContent className="prose prose-sm dark:prose-invert max-w-none space-y-4">
         <div>
-          <h4 className="font-semibold text-base mb-2">Strategy</h4>
+          <div className="flex justify-between items-start">
+            <h4 className="font-semibold text-base mb-2">Strategy</h4>
+            <TranslateButton textToTranslate={strategy} />
+          </div>
           <p className='whitespace-pre-wrap'>{strategy}</p>
         </div>
         <Separator />
@@ -48,22 +52,31 @@ const PlatformStrategyDisplay = ({ title, strategy, tactics }: { title: string, 
           <div className="space-y-3">
             <div className='flex items-start gap-3'>
               <Clock className='h-5 w-5 mt-1 text-primary flex-shrink-0' />
-              <div>
-                <h5 className='font-semibold'>Posting Times</h5>
+              <div className="flex-grow">
+                <div className="flex justify-between items-start">
+                  <h5 className='font-semibold'>Posting Times</h5>
+                  <TranslateButton textToTranslate={tactics.postingTimes} />
+                </div>
                 <p className='whitespace-pre-wrap'>{tactics.postingTimes}</p>
               </div>
             </div>
             <div className='flex items-start gap-3'>
               <Hash className='h-5 w-5 mt-1 text-primary flex-shrink-0' />
-              <div>
-                <h5 className='font-semibold'>Hashtag Strategy</h5>
+              <div className="flex-grow">
+                <div className="flex justify-between items-start">
+                  <h5 className='font-semibold'>Hashtag Strategy</h5>
+                  <TranslateButton textToTranslate={tactics.hashtagStrategy} />
+                </div>
                 <p className='whitespace-pre-wrap'>{tactics.hashtagStrategy}</p>
               </div>
             </div>
             <div className='flex items-start gap-3'>
               <TrendingUp className='h-5 w-5 mt-1 text-primary flex-shrink-0' />
-              <div>
-                <h5 className='font-semibold'>Growth Hacks</h5>
+              <div className="flex-grow">
+                <div className="flex justify-between items-start">
+                  <h5 className='font-semibold'>Growth Hacks</h5>
+                  <TranslateButton textToTranslate={tactics.growthHacks} />
+                </div>
                 <p className='whitespace-pre-wrap'>{tactics.growthHacks}</p>
               </div>
             </div>

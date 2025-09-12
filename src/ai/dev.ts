@@ -8,3 +8,4 @@ import '@/ai/flows/create-social-media-strategy.ts';
 import '@/ai/flows/generate-content-calendar.ts';
 import '@/ai/flows/autofill-audience-details.ts';
 import '@/ai/flows/identify-trending-topics.ts';
+import '@/ai/flows/translate-text.ts';

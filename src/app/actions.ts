@@ -7,6 +7,7 @@ import { generateContentCaptions, GenerateContentCaptionsInput } from '@/ai/flow
 import { generateContentCalendar, GenerateContentCalendarInput } from '@/ai/flows/generate-content-calendar';
 import { autofillAudienceDetails, type AutofillAudienceDetailsInput } from '@/ai/flows/autofill-audience-details';
 import { identifyTrendingTopics, type IdentifyTrendingTopicsInput } from '@/ai/flows/identify-trending-topics';
+import { translateText, type TranslateTextInput } from '@/ai/flows/translate-text';
 import { getJourneys as getJourneysFromDb, getJourney as getJourneyFromDb, saveJourney as saveJourneyToDb } from './firestore-actions';
 import type { SharedState } from './state';
 
@@ -78,6 +79,15 @@ export async function runTrendTracker(input: IdentifyTrendingTopicsInput) {
     } catch (error) {
         return handleError(error);
     }
+}
+
+export async function runTranslateText(input: TranslateTextInput) {
+  try {
+    const result = await translateText(input);
+    return { data: result };
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
 export async function getJourneys() {

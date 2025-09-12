@@ -8,6 +8,7 @@ import type { GenerateContentCaptionsInput } from '@/ai/flows/generate-content-c
 import type { GenerateContentCalendarInput } from '@/ai/flows/generate-content-calendar';
 import type { AutofillAudienceDetailsInput } from '@/ai/flows/autofill-audience-details';
 import type { IdentifyTrendingTopicsInput } from '@/ai/flows/identify-trending-topics';
+import type { TranslateTextInput, TranslateTextOutput } from '@/ai/flows/translate-text';
 
 export interface JourneyListItem {
   id: string;
@@ -26,6 +27,7 @@ interface AppContextType extends SharedState {
     generateViralHooks: (input: GenerateViralHooksInput) => Promise<void>;
     generateContentCaptions: (input: GenerateContentCaptionsInput) => Promise<void>;
     generateContentCalendar: (input: GenerateContentCalendarInput) => Promise<void>;
+    translateText: (input: TranslateTextInput) => Promise<TranslateTextOutput | null>;
     saveCurrentJourney: (name: string) => Promise<boolean>;
     saveAsNewJourney: (name: string) => Promise<boolean>;
     loadFullJourney: (journey: Journey, state: SharedState) => void;

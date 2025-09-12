@@ -20,6 +20,7 @@ import { Skeleton } from '../ui/skeleton';
 import { Input } from '../ui/input';
 import { ClipboardCopy } from './clipboard-copy';
 import { useAppContext } from '@/context/app-context';
+import { TranslateButton } from './translate-button';
 
 const formSchema = z.object({
   niche: z.string().min(3, { message: 'Niche must be at least 3 characters.' }),
@@ -113,7 +114,10 @@ export default function ViralHookGenerator() {
               {hooks.viralHooks.map((hook, index) => (
                 <li key={index} className="bg-secondary/50 p-3 rounded-md flex justify-between items-center gap-2">
                   <span className='flex-grow'>{hook}</span>
-                  <ClipboardCopy textToCopy={hook} />
+                  <div className="flex items-center flex-shrink-0">
+                    <TranslateButton textToTranslate={hook} />
+                    <ClipboardCopy textToCopy={hook} />
+                  </div>
                 </li>
               ))}
             </ul>

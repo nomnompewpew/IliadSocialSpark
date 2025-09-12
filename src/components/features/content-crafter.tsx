@@ -22,6 +22,7 @@ import { Skeleton } from '../ui/skeleton';
 import { Separator } from '../ui/separator';
 import { ClipboardCopy } from './clipboard-copy';
 import { useAppContext } from '@/context/app-context';
+import { TranslateButton } from './translate-button';
 
 const platforms = ['Instagram', 'TikTok', 'LinkedIn', 'X', 'Facebook'] as const;
 const formats = ['Carousel', 'Video', 'Story', 'Reel', 'Post'] as const;
@@ -163,7 +164,10 @@ export default function ContentCrafter() {
                 <div key={index}>
                     <div className="flex justify-between items-start gap-4">
                       <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap flex-grow">{caption}</div>
-                      <ClipboardCopy textToCopy={caption} />
+                      <div className="flex items-center">
+                        <TranslateButton textToTranslate={caption} />
+                        <ClipboardCopy textToCopy={caption} />
+                      </div>
                     </div>
                     {index < captions.captions.length - 1 && <Separator className="my-4" />}
                 </div>

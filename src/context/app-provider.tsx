@@ -12,6 +12,7 @@ import {
   runCalendarCreator,
   runAutofillAudienceDetails,
   runTrendTracker,
+  runTranslateText,
   saveJourney
 } from '@/app/actions';
 import type { AudienceInsightsInput } from '@/ai/flows/generate-audience-insights';
@@ -21,6 +22,7 @@ import type { GenerateContentCaptionsInput } from '@/ai/flows/generate-content-c
 import type { GenerateContentCalendarInput } from '@/ai/flows/generate-content-calendar';
 import type { AutofillAudienceDetailsInput } from '@/ai/flows/autofill-audience-details';
 import type { IdentifyTrendingTopicsInput } from '@/ai/flows/identify-trending-topics';
+import type { TranslateTextInput, TranslateTextOutput } from '@/ai/flows/translate-text';
 
 
 const initialState: SharedState = {
@@ -66,14 +68,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState(prevState => ({ ...prevState, errors: [] }));
   }, []);
 
-  const handleAction = useCallback(async <T, U>(action: (input: T) => Promise<{ data?: U; error?: string }>, input: T, successCallback: (data: U) => void) => {
+  const handleAction = useCallback(async <T, U>(action: (input: T) => Promise<{ data?: U; error?: string }>, input: T, successCallback?: (data: U) => void): Promise<U | null> => {
     const { data, error } = await action(input);
     if (error) {
       addError(error);
       return null;
     }
     if (data) {
-      successCallback(data);
+      if (successCallback) {
+        successCallback(data);
+      }
       return data;
     }
     return null;
@@ -130,6 +134,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, [handleAction, updateState]);
 
+  const translateText = useCallback(async (input: TranslateTextInput): Promise<TranslateTextOutput | null> => {
+    return handleAction(runTranslateText, input);
+  }, [handleAction]);
+
   const saveCurrentJourney = useCallback(async (name: string) => {
     const { data, error } = await saveJourney(state, name, state.currentJourney?.id);
     if (error) {
@@ -173,6 +181,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     generateViralHooks,
     generateContentCaptions,
     generateContentCalendar,
+    translateText,
     saveCurrentJourney,
     saveAsNewJourney,
     loadFullJourney,

@@ -24,6 +24,7 @@ import { Label } from '../ui/label';
 import { ClipboardCopy } from './clipboard-copy';
 import { useToast } from '@/hooks/use-toast';
 import { useAppContext } from '@/context/app-context';
+import { TranslateButton } from './translate-button';
 
 const formSchema = z.object({
   brandDetails: z.string().min(10, {
@@ -216,7 +217,10 @@ export default function AudienceInsights() {
               <p className="text-muted-foreground">The generated insights about your audience will appear here.</p>
             </div>
             {audienceAnalysisReport && (
-              <ClipboardCopy textToCopy={audienceAnalysisReport.audienceAnalysisReport} />
+              <div className='flex items-center'>
+                <TranslateButton textToTranslate={audienceAnalysisReport.audienceAnalysisReport} />
+                <ClipboardCopy textToCopy={audienceAnalysisReport.audienceAnalysisReport} />
+              </div>
             )}
           </div>
         </CardHeader>
