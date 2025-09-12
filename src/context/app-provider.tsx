@@ -169,7 +169,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     autofillAudienceDetails,
     generateStrategy,
     generateTrends,
-    generateViralHooks,
+generateViralHooks,
     generateContentCaptions,
     generateContentCalendar,
     saveCurrentJourney,
