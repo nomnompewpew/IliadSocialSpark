@@ -105,31 +105,8 @@ export default function LoginPage() {
             Sign in to access your AI-powered social media toolkit.
           </p>
         </div>
-        
-        {/* Domain configuration card */}
-        <Card className="w-full bg-secondary/30">
-            <CardHeader>
-                <CardTitle className="text-base">Domain Configuration</CardTitle>
-                <CardDescription>
-                    If login fails, ensure this domain is authorized in your Firebase project.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                {currentHostname ? (
-                    <div className="flex items-center justify-between gap-2 bg-muted p-3 rounded-md">
-                        <code className="text-sm break-all">{currentHostname}</code>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => copyToClipboard(currentHostname)}>
-                            <Copy className="h-4 w-4" />
-                            <span className="sr-only">Copy domain</span>
-                        </Button>
-                    </div>
-                ) : (
-                    <p className="text-sm text-muted-foreground">Loading hostname...</p>
-                )}
-            </CardContent>
-        </Card>
 
-        <div className="w-full">
+        <div className="w-full pt-4">
             <Button onClick={handleSignIn} disabled={loading} className="w-full">
                 {loading ? 'Signing in...' : 'Sign in with Google'}
             </Button>
