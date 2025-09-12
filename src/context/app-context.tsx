@@ -8,7 +8,7 @@ import type { GenerateContentCaptionsInput } from '@/ai/flows/generate-content-c
 import type { GenerateContentCalendarInput } from '@/ai/flows/generate-content-calendar';
 import type { AutofillAudienceDetailsInput } from '@/ai/flows/autofill-audience-details';
 import type { IdentifyTrendingTopicsInput } from '@/ai/flows/identify-trending-topics';
-import type { TranslateTextInput, TranslateTextOutput } from '@/ai/flows/translate-text';
+import type { TranslateTextInput, TranslateTextOutput } from '@/ai/schemas/translate-schemas';
 
 export interface JourneyListItem {
   id: string;
