@@ -3,16 +3,19 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { Button } from '@/components/ui/button';
-import { Sparkles, AlertTriangle } from 'lucide-react';
+import { Sparkles, AlertTriangle, ShieldAlert } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function LoginPage() {
   const { signIn, loading } = useAuth();
   const [authError, setAuthError] = useState<string | null>(null);
+  const [unauthorizedDomain, setUnauthorizedDomain] = useState<string | null>(null);
   const router = useRouter();
 
   const handleSignIn = async () => {
     setAuthError(null);
+    setUnauthorizedDomain(null);
     try {
       await signIn();
       // On successful sign-in, AuthProvider will handle redirecting to the main page.
@@ -24,18 +27,52 @@ export default function LoginPage() {
           "Please go to your Firebase Console -> Authentication -> Sign-in method -> Add new provider, and enable Google."
         );
       } else if (error.code === 'auth/unauthorized-domain') {
-        setAuthError(
-          `This domain is not authorized for authentication. Please add the following domain to your Firebase Console -> Authentication -> Settings -> Authorized domains: \n\n${window.location.hostname}`
-        );
+        // This is the special case we want to handle prominently.
+        setUnauthorizedDomain(window.location.hostname);
       } else {
         setAuthError("An unexpected error occurred during sign-in. Please try again.");
       }
     }
   };
+
+  // If we have an unauthorized domain error, show a dedicated screen.
+  if (unauthorizedDomain) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-lg border-destructive">
+            <CardHeader>
+                <div className='flex items-center gap-4'>
+                    <ShieldAlert className="h-10 w-10 text-destructive flex-shrink-0"/>
+                    <div>
+                        <CardTitle className='text-destructive'>Domain Not Authorized</CardTitle>
+                        <CardDescription>Your app's domain needs to be authorized in Firebase.</CardDescription>
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent className='space-y-4'>
+                <p>To fix this, please follow these steps:</p>
+                <ol className="list-decimal list-inside space-y-2 text-sm">
+                    <li>Go to your Firebase Console: <strong>Authentication &gt; Settings &gt; Authorized domains</strong>.</li>
+                    <li>Click <strong>"Add domain"</strong>.</li>
+                    <li>Copy and paste the following domain into the text box:</li>
+                </ol>
+                <div className='bg-muted p-4 rounded-md font-mono text-center text-sm break-all'>
+                    {unauthorizedDomain}
+                </div>
+                <p>After adding the domain, refresh this page and try signing in again.</p>
+                <Button onClick={() => window.location.reload()} className='w-full'>
+                    I have added the domain, refresh page
+                </Button>
+            </CardContent>
+        </Card>
+      </div>
+    );
+  }
   
+  // Default Login Page
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="mx-auto flex w-full max-w-sm flex-col items-center justify-center space-y-6">
+      <div className="mx-auto flex w-full max-w-sm flex-col items-center justify-center space-y-6 p-4">
         <div className="flex flex-col items-center space-y-2 text-center">
             <Sparkles className="h-12 w-12 text-primary" />
             <h1 className="text-3xl font-bold font-headline text-primary">
@@ -47,7 +84,7 @@ export default function LoginPage() {
         </div>
         <div className="w-full">
             <Button onClick={handleSignIn} disabled={loading} className="w-full">
-                Sign in with Google
+                {loading ? 'Signing in...' : 'Sign in with Google'}
             </Button>
         </div>
         {authError && (
