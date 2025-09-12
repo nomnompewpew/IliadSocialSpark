@@ -1,17 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { Button } from '@/components/ui/button';
-import { Sparkles, AlertTriangle, ShieldAlert } from 'lucide-react';
+import { Sparkles, AlertTriangle, ShieldAlert, Copy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+
 
 export default function LoginPage() {
   const { signIn, loading } = useAuth();
   const [authError, setAuthError] = useState<string | null>(null);
   const [unauthorizedDomain, setUnauthorizedDomain] = useState<string | null>(null);
-  const router = useRouter();
+  const [currentHostname, setCurrentHostname] = useState<string>('');
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // This runs only on the client, after the component has mounted.
+    setCurrentHostname(window.location.hostname);
+  }, []);
 
   const handleSignIn = async () => {
     setAuthError(null);
@@ -19,7 +27,8 @@ export default function LoginPage() {
     try {
       await signIn();
       // On successful sign-in, AuthProvider will handle redirecting to the main page.
-    } catch (error: any) {
+    } catch (error: any)
+    {
       console.error("Sign-in error:", error.code, error.message);
       if (error.code === 'auth/configuration-not-found') {
         setAuthError(
@@ -33,6 +42,21 @@ export default function LoginPage() {
         setAuthError("An unexpected error occurred during sign-in. Please try again.");
       }
     }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast({
+        title: 'Copied to clipboard!',
+        description: 'You can now paste the domain in Firebase.',
+      });
+    }, (err) => {
+      toast({
+        title: 'Failed to copy',
+        description: 'Could not copy domain to clipboard.',
+        variant: 'destructive'
+      })
+    });
   };
 
   // If we have an unauthorized domain error, show a dedicated screen.
@@ -59,7 +83,6 @@ export default function LoginPage() {
                 <div className='bg-muted p-4 rounded-md font-mono text-center text-sm break-all'>
                     {unauthorizedDomain}
                 </div>
-                <p>After adding the domain, refresh this page and try signing in again.</p>
                 <Button onClick={() => window.location.reload()} className='w-full'>
                     I have added the domain, refresh page
                 </Button>
@@ -82,6 +105,30 @@ export default function LoginPage() {
             Sign in to access your AI-powered social media toolkit.
           </p>
         </div>
+        
+        {/* Domain configuration card */}
+        <Card className="w-full bg-secondary/30">
+            <CardHeader>
+                <CardTitle className="text-base">Domain Configuration</CardTitle>
+                <CardDescription>
+                    If login fails, ensure this domain is authorized in your Firebase project.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                {currentHostname ? (
+                    <div className="flex items-center justify-between gap-2 bg-muted p-3 rounded-md">
+                        <code className="text-sm break-all">{currentHostname}</code>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => copyToClipboard(currentHostname)}>
+                            <Copy className="h-4 w-4" />
+                            <span className="sr-only">Copy domain</span>
+                        </Button>
+                    </div>
+                ) : (
+                    <p className="text-sm text-muted-foreground">Loading hostname...</p>
+                )}
+            </CardContent>
+        </Card>
+
         <div className="w-full">
             <Button onClick={handleSignIn} disabled={loading} className="w-full">
                 {loading ? 'Signing in...' : 'Sign in with Google'}
