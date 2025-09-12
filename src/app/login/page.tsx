@@ -25,8 +25,7 @@ export default function LoginPage() {
         );
       } else if (error.code === 'auth/unauthorized-domain') {
         setAuthError(
-          `This domain (${window.location.hostname}) is not authorized for authentication. ` +
-          "Please go to your Firebase Console -> Authentication -> Settings -> Authorized domains, and add this domain."
+          `This domain is not authorized for authentication. Please add the following domain to your Firebase Console -> Authentication -> Settings -> Authorized domains: \n\n${window.location.hostname}`
         );
       } else {
         setAuthError("An unexpected error occurred during sign-in. Please try again.");
@@ -56,7 +55,7 @@ export default function LoginPage() {
               <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-1" />
               <div className="flex-grow">
                 <p className="font-semibold">Configuration Error</p>
-                <p className="text-sm">{authError}</p>
+                <p className="text-sm whitespace-pre-wrap">{authError}</p>
               </div>
           </div>
         )}
