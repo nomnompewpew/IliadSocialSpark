@@ -3,30 +3,28 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { Button } from '@/components/ui/button';
-import { Sparkles, AlertTriangle, ShieldAlert, Copy } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Sparkles, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 
 export default function LoginPage() {
-  const { signIn, loading } = useAuth();
+  const { signIn, loading, user } = useAuth();
   const [authError, setAuthError] = useState<string | null>(null);
-  const [unauthorizedDomain, setUnauthorizedDomain] = useState<string | null>(null);
-  const [currentHostname, setCurrentHostname] = useState<string>('');
-  const { toast } = useToast();
-
+  
   useEffect(() => {
-    // This runs only on the client, after the component has mounted.
-    setCurrentHostname(window.location.hostname);
-  }, []);
+    // If the user is authenticated, redirect them to the main page.
+    // This is safer than relying on router.push() during initial load.
+    if (user) {
+      window.location.href = '/';
+    }
+  }, [user]);
 
   const handleSignIn = async () => {
     setAuthError(null);
-    setUnauthorizedDomain(null);
     try {
       await signIn();
-      // On successful sign-in, AuthProvider will handle redirecting to the main page.
+      // On successful sign-in, the AuthProvider's user state will update,
+      // and the useEffect above will trigger the redirect.
     } catch (error: any)
     {
       console.error("Sign-in error:", error.code, error.message);
@@ -35,61 +33,16 @@ export default function LoginPage() {
           "Google Sign-In is not enabled for this Firebase project. " +
           "Please go to your Firebase Console -> Authentication -> Sign-in method -> Add new provider, and enable Google."
         );
-      } else if (error.code === 'auth/unauthorized-domain') {
-        // This is the special case we want to handle prominently.
-        setUnauthorizedDomain(window.location.hostname);
       } else {
         setAuthError("An unexpected error occurred during sign-in. Please try again.");
       }
     }
   };
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      toast({
-        title: 'Copied to clipboard!',
-        description: 'You can now paste the domain in Firebase.',
-      });
-    }, (err) => {
-      toast({
-        title: 'Failed to copy',
-        description: 'Could not copy domain to clipboard.',
-        variant: 'destructive'
-      })
-    });
-  };
-
-  // If we have an unauthorized domain error, show a dedicated screen.
-  if (unauthorizedDomain) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background p-4">
-        <Card className="w-full max-w-lg border-destructive">
-            <CardHeader>
-                <div className='flex items-center gap-4'>
-                    <ShieldAlert className="h-10 w-10 text-destructive flex-shrink-0"/>
-                    <div>
-                        <CardTitle className='text-destructive'>Domain Not Authorized</CardTitle>
-                        <CardDescription>Your app's domain needs to be authorized in Firebase.</CardDescription>
-                    </div>
-                </div>
-            </CardHeader>
-            <CardContent className='space-y-4'>
-                <p>To fix this, please follow these steps:</p>
-                <ol className="list-decimal list-inside space-y-2 text-sm">
-                    <li>Go to your Firebase Console: <strong>Authentication &gt; Settings &gt; Authorized domains</strong>.</li>
-                    <li>Click <strong>"Add domain"</strong>.</li>
-                    <li>Copy and paste the following domain into the text box:</li>
-                </ol>
-                <div className='bg-muted p-4 rounded-md font-mono text-center text-sm break-all'>
-                    {unauthorizedDomain}
-                </div>
-                <Button onClick={() => window.location.reload()} className='w-full'>
-                    I have added the domain, refresh page
-                </Button>
-            </CardContent>
-        </Card>
-      </div>
-    );
+  
+  // Render null while checking for user to prevent flash of login page if already authenticated.
+  // The AuthProvider will show a loader.
+  if (user) {
+    return null;
   }
   
   // Default Login Page
