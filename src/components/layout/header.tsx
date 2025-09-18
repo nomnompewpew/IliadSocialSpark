@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Sparkles, Save, FolderOpen, Settings, User, LogOut, Moon, Sun, Laptop, AlertTriangle } from 'lucide-react';
+import { Sparkles, Save, FolderOpen, User, LogOut, Moon, Sun, Laptop, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -42,13 +42,15 @@ const Header = () => {
             </h1>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => setSaveOpen(true)}>
-              <Save className="mr-2 h-4 w-4" />
-              Save Journey
+            <Button variant="outline" size="icon" className="md:w-auto md:px-4" onClick={() => setSaveOpen(true)}>
+              <Save className="h-4 w-4 md:mr-2" />
+              <span className="hidden md:inline">Save Journey</span>
+              <span className="sr-only">Save Journey</span>
             </Button>
-            <Button variant="outline" onClick={() => setLoadOpen(true)}>
-              <FolderOpen className="mr-2 h-4 w-4" />
-              Load Journey
+            <Button variant="outline" size="icon" className="md:w-auto md:px-4" onClick={() => setLoadOpen(true)}>
+              <FolderOpen className="h-4 w-4 md:mr-2" />
+              <span className="hidden md:inline">Load Journey</span>
+              <span className="sr-only">Load Journey</span>
             </Button>
             
             <DropdownMenu>
