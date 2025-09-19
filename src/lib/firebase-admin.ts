@@ -9,10 +9,10 @@ let db: admin.firestore.Firestore;
 try {
   // Check if the app is already initialized
   if (!admin.apps.length) {
-    const serviceAccountString = process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT_JSON;
+    const serviceAccountString = process.env.FB_ADMIN_SERVICE_ACCOUNT_JSON;
 
     if (!serviceAccountString) {
-      throw new Error('Firebase credentials are not set. Please provide the FIREBASE_ADMIN_SERVICE_ACCOUNT_JSON environment variable.');
+      throw new Error('Firebase credentials are not set. Please provide the FB_ADMIN_SERVICE_ACCOUNT_JSON environment variable.');
     }
     
     // The service account can be a complex JSON object, so we need to parse it.
