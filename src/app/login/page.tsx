@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { Button } from '@/components/ui/button';
 import { Sparkles, AlertTriangle } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import Link from 'next/link';
 
 
 export default function LoginPage() {
@@ -13,7 +13,6 @@ export default function LoginPage() {
   
   useEffect(() => {
     // If the user is authenticated, redirect them to the main page.
-    // This is safer than relying on router.push() during initial load.
     if (user) {
       window.location.href = '/';
     }
@@ -40,7 +39,6 @@ export default function LoginPage() {
   };
   
   // Render null while checking for user to prevent flash of login page if already authenticated.
-  // The AuthProvider will show a loader.
   if (user) {
     return null;
   }
@@ -73,9 +71,18 @@ export default function LoginPage() {
               </div>
           </div>
         )}
-        <p className="px-8 text-center text-sm text-muted-foreground">
-            Access is restricted to authorized team members.
-        </p>
+        <div className="px-8 text-center text-sm text-muted-foreground">
+            <p>By continuing, you agree to our</p>
+            <div className='flex justify-center gap-2'>
+              <Link href="/terms" className="underline underline-offset-4 hover:text-primary">
+                Terms of Service
+              </Link>
+                <span>and</span>
+              <Link href="/privacy" className="underline underline-offset-4 hover:text-primary">
+                Privacy Policy
+              </Link>.
+            </div>
+        </div>
       </div>
     </div>
   );
