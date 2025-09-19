@@ -1,6 +1,7 @@
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
   title: 'Iliad Social Spark',
@@ -21,6 +22,12 @@ export default function LegalLayout({
               Iliad Social Spark
             </h1>
           </Link>
+          <Button asChild variant="outline">
+            <Link href="/login">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Return to Sign In
+            </Link>
+          </Button>
         </div>
       </header>
       <main className="flex-grow container mx-auto px-4 py-8 md:py-12">
