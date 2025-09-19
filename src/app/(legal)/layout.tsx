@@ -1,4 +1,4 @@
-import { Sparkles, ArrowLeft } from 'lucide-react';
+import { Sparkles, X } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -16,16 +16,15 @@ export default function LegalLayout({
     <div className="flex min-h-screen flex-col bg-background">
       <header className="border-b border-border/40 bg-background/95">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2" tabIndex={-1} aria-hidden="true">
             <Sparkles className="h-8 w-8 text-primary" />
             <h1 className="text-2xl font-bold font-headline text-primary">
               Iliad Social Spark
             </h1>
           </Link>
-          <Button asChild variant="outline">
-            <Link href="/login">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Return to Sign In
+          <Button asChild variant="ghost" className="h-12 w-12 rounded-full text-destructive hover:bg-destructive/10 hover:text-destructive">
+            <Link href="/login" aria-label="Close and return to sign in">
+              <X className="h-8 w-8" />
             </Link>
           </Button>
         </div>
