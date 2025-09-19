@@ -43,8 +43,8 @@ const AccessDenied = ({ onSignOut }: { onSignOut: () => void }) => {
                 <ShieldOff className="h-16 w-16 text-destructive" />
                 <h1 className="text-3xl font-bold font-headline">Access Denied</h1>
                 <p className="text-muted-foreground">
-                    This application is restricted to users with an @iliadmg.com email address.
-                    Please sign in with an authorized account.
+                    This application is restricted to authorized users.
+                    Please sign in with an authorized account from a permitted domain.
                 </p>
                 <Button onClick={onSignOut} variant="outline">
                     Sign Out and Try Again
@@ -61,13 +61,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isTeamMember, setIsTeamMember] = useState<boolean | null>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const publicRoutes = ['/login', '/terms', '/privacy'];
 
   const auth = getAuth(app);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        if (user.email && user.email.endsWith('@iliadmg.com')) {
+        const userEmail = user.email || '';
+        const isAuthorized = userEmail.endsWith('@iliadmg.com') || userEmail.endsWith('@radiorancho.com');
+
+        if (isAuthorized) {
             setUser(user);
             setIsTeamMember(true);
         } else {
@@ -87,18 +91,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (loading) return; 
 
-    const isLoginPage = pathname === '/login';
+    const isPublicRoute = publicRoutes.includes(pathname);
 
-    // If user is not authenticated and not on the login page, redirect to login.
-    if (!user && !isLoginPage) {
+    // If user is not authenticated and not on a public route, redirect to login.
+    if (!user && !isPublicRoute) {
       router.push('/login');
     }
 
     // If user is authenticated and on the login page, redirect to home.
-    if (user && isLoginPage) {
+    if (user && pathname === '/login') {
         router.push('/');
     }
-  }, [user, loading, pathname, router]);
+  }, [user, loading, pathname, router, publicRoutes]);
 
   const signIn = async () => {
     setLoading(true);
@@ -139,8 +143,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
   }
 
-  // If we are on the login page OR if we have a valid user, render children
-  if (pathname === '/login' || (user && isTeamMember)) {
+  // If we are on a public route OR if we have a valid user, render children
+  if (publicRoutes.includes(pathname) || (user && isTeamMember)) {
      return (
         <AuthContext.Provider value={value}>
             {children}

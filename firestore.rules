@@ -1,0 +1,15 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Restrict access to the clientJourneys collection
+    match /clientJourneys/{journeyId} {
+      // Allow read and write (create, update, delete) operations ONLY IF
+      // the user is authenticated and their email domain is either
+      // 'iliadmg.com' or 'radiorancho.com'.
+      allow read, write: if request.auth != null && 
+                          (request.auth.token.email.matches('.*@iliadmg\\.com$') || 
+                           request.auth.token.email.matches('.*@radiorancho\\.com$'));
+    }
+  }
+}
