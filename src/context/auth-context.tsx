@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isTeamMember, setIsTeamMember] = useState<boolean | null>(null);
   const router = useRouter();
   const pathname = usePathname();
-  const publicRoutes = ['/login', '/terms', '/privacy'];
+  const publicRoutes = ['/login'];
 
   const auth = getAuth(app);
 
@@ -102,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user && pathname === '/login') {
         router.push('/');
     }
-  }, [user, loading, pathname, router, publicRoutes]);
+  }, [user, loading, pathname, router]);
 
   const signIn = async () => {
     setLoading(true);
