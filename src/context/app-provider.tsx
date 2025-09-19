@@ -70,15 +70,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const handleAction = useCallback(async <T, U>(action: (input: T) => Promise<{ data?: U; error?: string }>, input: T, successCallback?: (data: U) => void): Promise<U | null> => {
     const result = await action(input);
-    if (result.error) {
-      addError(result.error);
+    if ('error' in result) {
+      addError(result.error!);
       return null;
     }
-    if (result.data) {
+    
+    const data = result.data
+    if (data) {
       if (successCallback) {
-        successCallback(result.data);
+        successCallback(data);
       }
-      return result.data;
+      return data;
     }
     return null;
   }, [addError]);
@@ -140,7 +142,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const saveCurrentJourney = useCallback(async (name: string) => {
     const result = await saveJourney(state, name, state.currentJourney?.id);
-    if (result.error) {
+    if ('error' in result) {
       addError(result.error);
       return false;
     }
@@ -154,7 +156,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const saveAsNewJourney = useCallback(async (name: string) => {
     // Pass undefined for the ID to force creation of a new document
     const result = await saveJourney(state, name, undefined); 
-    if (result.error) {
+    if ('error' in result) {
       addError(result.error);
       return false;
     }

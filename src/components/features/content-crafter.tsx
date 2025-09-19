@@ -66,12 +66,17 @@ export default function ContentCrafter() {
     updateState({ captions: null });
     
     const platformKey = values.platform.toLowerCase().replace(/\s\(.*\)/, '') as keyof typeof strategy;
-    const strategyForPlatform = strategy ? strategy[platformKey] : undefined;
-
-    const strategyPayload = strategyForPlatform ? {
-      platformStrategy: strategyForPlatform.strategy,
-      tactics: strategyForPlatform.tactics
-    } : undefined;
+    
+    let strategyPayload;
+    if (strategy && platformKey in strategy) {
+      const strategyForPlatform = strategy[platformKey];
+      if (strategyForPlatform) {
+        strategyPayload = {
+          platformStrategy: strategyForPlatform.strategy,
+          tactics: strategyForPlatform.tactics
+        };
+      }
+    }
 
     startTransition(async () => {
       await generateContentCaptions({ 

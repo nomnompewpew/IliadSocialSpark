@@ -16,6 +16,7 @@ import { Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import type { JourneyListItem } from '@/context/app-context';
 import { useAppContext } from '@/context/app-context';
+import type { SharedState } from '@/app/state';
 
 interface LoadJourneyDialogProps {
   isOpen: boolean;
@@ -33,9 +34,9 @@ export default function LoadJourneyDialog({ isOpen, setIsOpen }: LoadJourneyDial
     if (isOpen) {
       setIsLoading(true);
       getJourneys().then((result) => {
-        if (result.error) {
+        if ('error' in result) {
           addError(result.error);
-        } else if(result.data) {
+        } else {
           setJourneys(result.data);
         }
         setIsLoading(false);
@@ -47,11 +48,11 @@ export default function LoadJourneyDialog({ isOpen, setIsOpen }: LoadJourneyDial
     if (!selectedJourneyId) return;
     setIsLoading(true);
     const result = await loadJourney(selectedJourneyId);
-    if (result.error) {
+    if ('error' in result) {
         addError(result.error);
-    } else if (result.data) {
+    } else {
         const selectedJourney = journeys.find(j => j.id === selectedJourneyId);
-        if (selectedJourney) {
+        if (selectedJourney && result.data) {
             loadFullJourney({ id: selectedJourney.id, name: selectedJourney.name }, result.data);
             toast({ title: 'Journey Loaded', description: `Successfully loaded "${selectedJourney.name}".` });
             setIsOpen(false);
