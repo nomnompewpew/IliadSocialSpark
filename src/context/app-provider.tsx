@@ -69,16 +69,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const handleAction = useCallback(async <T, U>(action: (input: T) => Promise<{ data?: U; error?: string }>, input: T, successCallback?: (data: U) => void): Promise<U | null> => {
-    const { data, error } = await action(input);
-    if (error) {
-      addError(error);
+    const result = await action(input);
+    if (result.error) {
+      addError(result.error);
       return null;
     }
-    if (data) {
+    if (result.data) {
       if (successCallback) {
-        successCallback(data);
+        successCallback(result.data);
       }
-      return data;
+      return result.data;
     }
     return null;
   }, [addError]);
@@ -139,13 +139,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [handleAction]);
 
   const saveCurrentJourney = useCallback(async (name: string) => {
-    const { data, error } = await saveJourney(state, name, state.currentJourney?.id);
-    if (error) {
-      addError(error);
+    const result = await saveJourney(state, name, state.currentJourney?.id);
+    if (result.error) {
+      addError(result.error);
       return false;
     }
-    if (data) {
-      updateState({ currentJourney: { id: data.id, name } });
+    if (result.data) {
+      updateState({ currentJourney: { id: result.data.id, name } });
       return true;
     }
     return false;
@@ -153,13 +153,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const saveAsNewJourney = useCallback(async (name: string) => {
     // Pass undefined for the ID to force creation of a new document
-    const { data, error } = await saveJourney(state, name, undefined); 
-    if (error) {
-      addError(error);
+    const result = await saveJourney(state, name, undefined); 
+    if (result.error) {
+      addError(result.error);
       return false;
     }
-    if (data) {
-      updateState({ currentJourney: { id: data.id, name } });
+    if (result.data) {
+      updateState({ currentJourney: { id: result.data.id, name } });
       return true;
     }
     return false;

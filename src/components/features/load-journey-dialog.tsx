@@ -32,11 +32,11 @@ export default function LoadJourneyDialog({ isOpen, setIsOpen }: LoadJourneyDial
   useEffect(() => {
     if (isOpen) {
       setIsLoading(true);
-      getJourneys().then(({ data, error }) => {
-        if (error) {
-          addError(error);
-        } else if(data) {
-          setJourneys(data);
+      getJourneys().then((result) => {
+        if (result.error) {
+          addError(result.error);
+        } else if(result.data) {
+          setJourneys(result.data);
         }
         setIsLoading(false);
       });
@@ -46,13 +46,13 @@ export default function LoadJourneyDialog({ isOpen, setIsOpen }: LoadJourneyDial
   const handleLoad = async () => {
     if (!selectedJourneyId) return;
     setIsLoading(true);
-    const { data, error } = await loadJourney(selectedJourneyId);
-    if (error) {
-        addError(error);
-    } else if (data) {
+    const result = await loadJourney(selectedJourneyId);
+    if (result.error) {
+        addError(result.error);
+    } else if (result.data) {
         const selectedJourney = journeys.find(j => j.id === selectedJourneyId);
         if (selectedJourney) {
-            loadFullJourney({ id: selectedJourney.id, name: selectedJourney.name }, data);
+            loadFullJourney({ id: selectedJourney.id, name: selectedJourney.name }, result.data);
             toast({ title: 'Journey Loaded', description: `Successfully loaded "${selectedJourney.name}".` });
             setIsOpen(false);
         }
