@@ -6,7 +6,6 @@ import { app } from '@/lib/firebase';
 import { Loader2, ShieldOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter, usePathname } from 'next/navigation';
-import LoginPage from '@/app/login/page';
 
 interface AuthContextType {
   user: User | null;
@@ -37,8 +36,7 @@ const AuthLoader = () => (
 );
 
 // Access Denied component
-const AccessDenied = () => {
-    const { signOutUser } = useAuth();
+const AccessDenied = ({ onSignOut }: { onSignOut: () => void }) => {
     return (
         <div className="flex h-screen w-screen items-center justify-center bg-background">
             <div className="flex flex-col items-center gap-6 text-center max-w-md p-4">
@@ -48,7 +46,7 @@ const AccessDenied = () => {
                     This application is restricted to users with an @iliadmg.com email address.
                     Please sign in with an authorized account.
                 </p>
-                <Button onClick={signOutUser} variant="outline">
+                <Button onClick={onSignOut} variant="outline">
                     Sign Out and Try Again
                 </Button>
             </div>
@@ -89,15 +87,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (loading) return; 
 
-    const isPublicPage = pathname === '/login' || pathname === '/terms' || pathname === '/privacy';
+    const isLoginPage = pathname === '/login';
 
-    // If user is not authenticated and not on a public page, redirect to login.
-    if (!user && !isPublicPage) {
+    // If user is not authenticated and not on the login page, redirect to login.
+    if (!user && !isLoginPage) {
       router.push('/login');
     }
 
     // If user is authenticated and on the login page, redirect to home.
-    if (user && pathname === '/login') {
+    if (user && isLoginPage) {
         router.push('/');
     }
   }, [user, loading, pathname, router]);
@@ -111,6 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Error during sign-in:", error);
       setLoading(false);
+      throw error;
     }
   };
 
@@ -132,23 +131,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
   
   if (isTeamMember === false) {
+    // Provide a valid context for the AccessDenied page to use signOut
     return (
         <AuthContext.Provider value={value}>
-            <AccessDenied />
+            <AccessDenied onSignOut={signOutUser} />
         </AuthContext.Provider>
     );
   }
 
-  const isPublicPage = pathname === '/login' || pathname === '/terms' || pathname === '/privacy';
-  if (isPublicPage) {
-     return (
-        <AuthContext.Provider value={value}>
-            {children}
-        </AuthContext.Provider>
-    );
-  }
-  
-  if (user && isTeamMember) {
+  // If we are on the login page OR if we have a valid user, render children
+  if (pathname === '/login' || (user && isTeamMember)) {
      return (
         <AuthContext.Provider value={value}>
             {children}

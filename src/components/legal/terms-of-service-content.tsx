@@ -4,10 +4,9 @@ export const metadata: Metadata = {
   title: 'Terms of Service | Iliad Social Spark',
 };
 
-export default function TermsPage() {
+export function TermsOfServiceContent() {
   return (
     <>
-      <h1>Terms of Service for Iliad Social Spark</h1>
       <p><strong>Last Updated:</strong> {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
 
       <h2>1. Acceptance of Terms</h2>

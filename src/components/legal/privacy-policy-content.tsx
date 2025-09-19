@@ -4,10 +4,9 @@ export const metadata: Metadata = {
   title: 'Privacy Policy | Iliad Social Spark',
 };
 
-export default function PrivacyPage() {
+export function PrivacyPolicyContent() {
   return (
     <>
-      <h1>Privacy Policy for Iliad Social Spark</h1>
       <p><strong>Last Updated:</strong> {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
 
       <h2>Introduction</h2>

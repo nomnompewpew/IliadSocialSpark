@@ -4,7 +4,16 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { Button } from '@/components/ui/button';
 import { Sparkles, AlertTriangle } from 'lucide-react';
-import Link from 'next/link';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { PrivacyPolicyContent } from '@/components/legal/privacy-policy-content';
+import { TermsOfServiceContent } from '@/components/legal/terms-of-service-content';
 
 
 export default function LoginPage() {
@@ -73,14 +82,38 @@ export default function LoginPage() {
         )}
         <div className="px-8 text-center text-sm text-muted-foreground">
             <p>By continuing, you agree to our</p>
-            <div className='flex justify-center gap-2'>
-              <Link href="/terms" className="underline underline-offset-4 hover:text-primary">
-                Terms of Service
-              </Link>
+            <div className='flex justify-center gap-1'>
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button variant="link" className="p-0 h-auto text-sm">Terms of Service</Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-3xl">
+                        <DialogHeader>
+                        <DialogTitle>Terms of Service</DialogTitle>
+                        </DialogHeader>
+                        <ScrollArea className="h-[70vh] pr-6">
+                            <div className="prose prose-sm dark:prose-invert max-w-none">
+                                <TermsOfServiceContent />
+                            </div>
+                        </ScrollArea>
+                    </DialogContent>
+                </Dialog>
                 <span>and</span>
-              <Link href="/privacy" className="underline underline-offset-4 hover:text-primary">
-                Privacy Policy
-              </Link>.
+                <Dialog>
+                    <DialogTrigger asChild>
+                         <Button variant="link" className="p-0 h-auto text-sm">Privacy Policy</Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-3xl">
+                        <DialogHeader>
+                        <DialogTitle>Privacy Policy</DialogTitle>
+                        </DialogHeader>
+                         <ScrollArea className="h-[70vh] pr-6">
+                            <div className="prose prose-sm dark:prose-invert max-w-none">
+                                <PrivacyPolicyContent />
+                            </div>
+                        </ScrollArea>
+                    </DialogContent>
+                </Dialog>.
             </div>
         </div>
       </div>
