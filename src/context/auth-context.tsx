@@ -87,18 +87,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [auth]);
 
   useEffect(() => {
-    // This effect handles redirects after the initial authentication state has been determined.
-    if (loading) return; // Don't do anything while auth state is resolving
+    if (loading) return; 
 
-    const isLoginPage = pathname === '/login';
+    const isPublicPage = pathname === '/login' || pathname === '/terms' || pathname === '/privacy';
 
-    // If user is not authenticated and not on the login page, redirect them to login.
-    if (!user && !isLoginPage) {
+    // If user is not authenticated and not on a public page, redirect to login.
+    if (!user && !isPublicPage) {
       router.push('/login');
     }
 
-    // If user is authenticated and on the login page, redirect them to the home page.
-    if (user && isLoginPage) {
+    // If user is authenticated and on the login page, redirect to home.
+    if (user && pathname === '/login') {
         router.push('/');
     }
   }, [user, loading, pathname, router]);
@@ -128,12 +127,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value = { user, loading, signIn, signOutUser, isTeamMember };
   
-  // While Firebase is initializing, show a loader to prevent any content flash.
   if (loading) {
     return <AuthLoader />;
   }
   
-  // If the user is not a team member (e.g., used a gmail account), show Access Denied.
   if (isTeamMember === false) {
     return (
         <AuthContext.Provider value={value}>
@@ -142,9 +139,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
   }
 
-  // If we are on the login page, we don't need to check for a user.
-  // Just render the page.
-  if (pathname === '/login') {
+  const isPublicPage = pathname === '/login' || pathname === '/terms' || pathname === '/privacy';
+  if (isPublicPage) {
      return (
         <AuthContext.Provider value={value}>
             {children}
@@ -152,7 +148,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
   }
   
-  // If user is authenticated as a team member, show the main application.
   if (user && isTeamMember) {
      return (
         <AuthContext.Provider value={value}>
