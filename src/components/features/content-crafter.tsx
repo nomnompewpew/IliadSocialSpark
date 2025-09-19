@@ -23,6 +23,7 @@ import { Separator } from '../ui/separator';
 import { ClipboardCopy } from './clipboard-copy';
 import { useAppContext } from '@/context/app-context';
 import { TranslateButton } from './translate-button';
+import { CreateSocialMediaStrategyOutput } from '@/ai/flows/create-social-media-strategy';
 
 const platforms = ['Instagram', 'TikTok', 'LinkedIn', 'X', 'Facebook'] as const;
 const formats = ['Carousel', 'Video', 'Story', 'Reel', 'Post'] as const;
@@ -34,6 +35,17 @@ const formSchema = z.object({
   topic: z.string().min(3, { message: 'Topic must be at least 3 characters.' }),
   keywords: z.string().min(3, { message: 'Please provide at least one keyword.' }),
 });
+
+// Define a more specific type for the strategy payload
+type StrategyPayload = {
+  platformStrategy: string;
+  tactics: {
+      postingTimes: string;
+      hashtagStrategy: string;
+      growthHacks: string;
+  };
+} | undefined;
+
 
 export default function ContentCrafter() {
   const [isPending, startTransition] = useTransition();
@@ -65,12 +77,12 @@ export default function ContentCrafter() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     updateState({ captions: null });
     
-    const platformKey = values.platform.toLowerCase().replace(/\s\(.*\)/, '') as keyof typeof strategy;
+    const platformKey = values.platform.toLowerCase().replace(' (twitter)', '') as keyof CreateSocialMediaStrategyOutput;
     
-    let strategyPayload;
+    let strategyPayload: StrategyPayload;
     if (strategy && platformKey in strategy) {
       const strategyForPlatform = strategy[platformKey];
-      if (strategyForPlatform) {
+      if (strategyForPlatform && 'strategy' in strategyForPlatform && 'tactics' in strategyForPlatform) {
         strategyPayload = {
           platformStrategy: strategyForPlatform.strategy,
           tactics: strategyForPlatform.tactics
